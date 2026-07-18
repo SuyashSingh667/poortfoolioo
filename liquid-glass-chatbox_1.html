@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Liquid Glass AI Assistant</title>
+<style>
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.035);
+    --glass-bg-strong: rgba(255, 255, 255, 0.09);
+    --glass-border: rgba(255, 255, 255, 0.45);
+    --glass-highlight: rgba(255, 255, 255, 0.8);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.72);
+    --text-muted: rgba(255, 255, 255, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    background: #0d0e12;
+    overflow: hidden;
+    padding: 24px;
+  }
+
+  /* ---- backdrop: soft blurred colour blobs so the glass has something to refract ---- */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(circle at 20% 25%, #8a8f9c 0%, transparent 45%),
+      radial-gradient(circle at 80% 20%, #cfd2d8 0%, transparent 40%),
+      radial-gradient(circle at 30% 80%, #6b6f78 0%, transparent 45%),
+      radial-gradient(circle at 85% 75%, #b8bcc4 0%, transparent 40%),
+      linear-gradient(135deg, #1a1b1f 0%, #3a3c44 50%, #1a1b1f 100%);
+    filter: blur(60px) saturate(120%);
+    transform: scale(1.2);
+  }
+
+  /* ---- slab wrapper: holds the "thickness" layer behind the front face ---- */
+  .glass-slab {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* the visible depth of the glass — a slightly offset, darker duplicate of the
+     card shape sitting behind the front face, like looking at the side of a
+     poured-glass block */
+  .slab-edge {
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    transform: translate(7px, 10px);
+    background: rgba(10, 11, 14, 0.28);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* ---- the glass card (front face of the slab) ---- */
+  .glass-card {
+    position: relative;
+    z-index: 1;
+    border-radius: 32px;
+    padding: 28px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 30px 60px -15px rgba(0, 0, 0, 0.55),
+      0 10px 24px -8px rgba(0, 0, 0, 0.45),
+      inset 0 1.5px 1px var(--glass-highlight),
+      inset 0 -1.5px 2px rgba(0, 0, 0, 0.35),
+      inset 0 0 60px rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+
+  /* diagonal specular highlight — the "light catching the glass" blob */
+  .glass-card::before {
+    content: "";
+    position: absolute;
+    top: -30%; left: -20%;
+    width: 70%; height: 70%;
+    background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%);
+    pointer-events: none;
+    transform: rotate(-20deg);
+  }
+
+  /* thin refraction ring around the edge, brighter top-left, dark bottom-right —
+     the classic beveled-edge look of a glass slab */
+  .glass-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,255,255,0) 28%, rgba(255,255,255,0) 65%, rgba(0,0,0,0.25) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ---- header ---- */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--text-primary);
+  }
+
+  .sparkle {
+    width: 16px;
+    height: 16px;
+    color: #fff;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.6));
+  }
+
+  .menu-dots {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .menu-dots:hover { background: rgba(255,255,255,0.14); }
+
+  /* ---- hero text ---- */
+  .hero {
+    text-align: center;
+    margin: 18px 0 26px;
+  }
+
+  .hero h1 {
+    margin: 0 0 6px;
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .hero p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+
+  /* ---- suggestion grid ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: var(--glass-bg);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--text-primary);
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  }
+
+  .chip:hover {
+    background: var(--glass-bg-strong);
+    border-color: rgba(255,255,255,0.32);
+    transform: translateY(-1px);
+  }
+
+  .chip:active { transform: translateY(0) scale(0.98); }
+
+  .chip-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .chip-icon svg { width: 15px; height: 15px; }
+
+  /* ---- input bar ---- */
+  .input-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 6px 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .input-bar svg.search { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
+
+  .input-bar input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    padding: 10px 0;
+  }
+  .input-bar input::placeholder { color: var(--text-muted); }
+
+  .send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .send-btn:hover { background: #eee; }
+  .send-btn:active { transform: scale(0.92); }
+  .send-btn svg { width: 16px; height: 16px; color: #111; }
+</style>
+</head>
+<body>
+
+  <div class="backdrop"></div>
+
+  <div class="glass-slab">
+    <div class="slab-edge"></div>
+    <div class="glass-card">
+    <div class="header">
+      <div class="brand">
+        <svg class="sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/><path d="M19 15l.8 2.6L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.4L19 15z" opacity="0.7"/></svg>
+        AI Assistant
+      </div>
+      <div class="menu-dots">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1>Hello.</h1>
+      <p>How can I help you today?</p>
+    </div>
+
+    <div class="grid">
+      <button class="chip">
+        <span class="chip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4" stroke-linecap="round"/><circle cx="12" cy="17" r="0.4" fill="currentColor"/></svg>
+        </span>
+        Answer a question
+      </button>
+      <button class="chip">
+        <span class="chip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Summarize a document
+      </button>
+      <button class="chip">
+        <span class="chip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18a6 6 0 1 1 6 0" stroke-linecap="round"/><path d="M9.5 21h5" stroke-linecap="round"/><path d="M12 3v2" stroke-linecap="round"/></svg>
+        </span>
+        Give me ideas
+      </button>
+      <button class="chip">
+        <span class="chip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 8l-4 4 4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 8l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Write some code
+      </button>
+    </div>
+
+    <div class="input-bar">
+      <svg class="search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Ask anything..." />
+      <button class="send-btn" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14" stroke-linecap="round"/><path d="M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    </div>
+  </div>
+
+</body>
+</html>

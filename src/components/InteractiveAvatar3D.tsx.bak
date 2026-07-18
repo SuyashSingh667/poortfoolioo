@@ -1,0 +1,430 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+
+export default function InteractiveAvatar3D() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Get current dimensions
+    const width = container.clientWidth || 300;
+    const height = container.clientHeight || 300;
+
+    // ─── Three.js Setup ──────────────────────────────────────────────────────
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.set(0, 0.5, 5.5);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // ─── Lighting ────────────────────────────────────────────────────────────
+    scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    mainLight.position.set(5, 5, 4);
+    scene.add(mainLight);
+
+    // Colorful neon accent lights
+    const pinkLight = new THREE.PointLight(0xec4899, 5, 10);
+    pinkLight.position.set(-3, 1, 2);
+    scene.add(pinkLight);
+
+    const orangeLight = new THREE.PointLight(0xf97316, 5, 10);
+    orangeLight.position.set(3, -2, 2);
+    scene.add(orangeLight);
+
+    const cyberLight = new THREE.PointLight(0x06b6d4, 4, 8);
+    cyberLight.position.set(0, 3, -1);
+    scene.add(cyberLight);
+
+    // ─── Create Low-Poly Avatar Group ───────────────────────────────────────
+    const avatarGroup = new THREE.Group();
+    scene.add(avatarGroup);
+
+    // 1. Materials
+    const skinMat = new THREE.MeshStandardMaterial({
+      color: 0xdfc4b5,
+      roughness: 0.6,
+      metalness: 0.1,
+      flatShading: true, // forces faceted low-poly look
+    });
+
+    const jacketMat = new THREE.MeshStandardMaterial({
+      color: 0x4f382a, // brown jacket from avatar.png
+      roughness: 0.8,
+      metalness: 0.15,
+      flatShading: true,
+    });
+
+    const shirtMat = new THREE.MeshStandardMaterial({
+      color: 0x18181b, // dark charcoal shirt
+      roughness: 0.7,
+      flatShading: true,
+    });
+
+    const hairMat = new THREE.MeshStandardMaterial({
+      color: 0x221c1a, // black/dark brown hair
+      roughness: 0.9,
+      flatShading: true,
+    });
+
+    const glassFrameMat = new THREE.MeshStandardMaterial({
+      color: 0x111111,
+      roughness: 0.2,
+      metalness: 0.9,
+    });
+
+    const lensMat = new THREE.MeshStandardMaterial({
+      color: 0xf97316, // orange reflective lenses
+      roughness: 0.1,
+      metalness: 0.9,
+      emissive: 0xf97316,
+      emissiveIntensity: 0.35,
+    });
+
+    const goldAccentMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706, // gold hand prints/accents
+      roughness: 0.3,
+      metalness: 0.8,
+      flatShading: true,
+    });
+
+    // 2. Torso (Shoulders & Jacket)
+    const torsoGeo = new THREE.CylinderGeometry(0.6, 1.0, 0.9, 8);
+    const torso = new THREE.Mesh(torsoGeo, jacketMat);
+    torso.position.y = -1.1;
+    torso.rotation.y = Math.PI / 8;
+    avatarGroup.add(torso);
+
+    // 3. Shirt Collar / Inner Torso
+    const shirtGeo = new THREE.CylinderGeometry(0.35, 0.5, 0.85, 8);
+    const shirt = new THREE.Mesh(shirtGeo, shirtMat);
+    shirt.position.y = -1.05;
+    avatarGroup.add(shirt);
+
+    // 4. Gold Accent Prints on Jacket (Faceted detail)
+    const leftAccentGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+    const leftAccent = new THREE.Mesh(leftAccentGeo, goldAccentMat);
+    leftAccent.position.set(-0.35, -0.95, 0.6);
+    leftAccent.rotation.set(0.2, 0.4, 0.5);
+    avatarGroup.add(leftAccent);
+
+    const rightAccent = new THREE.Mesh(leftAccentGeo, goldAccentMat);
+    rightAccent.position.set(0.35, -1.0, 0.58);
+    rightAccent.rotation.set(-0.1, -0.3, 0.2);
+    avatarGroup.add(rightAccent);
+
+    // 5. Neck
+    const neckGeo = new THREE.CylinderGeometry(0.2, 0.24, 0.35, 6);
+    const neck = new THREE.Mesh(neckGeo, skinMat);
+    neck.position.y = -0.58;
+    avatarGroup.add(neck);
+
+    // 6. Head (faceted box/sphere blend for stylized blocky head)
+    const headGroup = new THREE.Group();
+    headGroup.position.y = 0.0;
+    avatarGroup.add(headGroup);
+
+    const faceGeo = new THREE.BoxGeometry(0.72, 0.84, 0.72, 2, 2, 2);
+    // Add minor random noise to vertices to make it look hand-carved low-poly
+    const pos = faceGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const y = pos.getY(i);
+      const z = pos.getZ(i);
+      // Don't deform center lines too much
+      if (Math.abs(x) > 0.1 && Math.abs(y) > 0.1) {
+        pos.setX(i, x + (Math.random() - 0.5) * 0.03);
+        pos.setY(i, y + (Math.random() - 0.5) * 0.03);
+        pos.setZ(i, z + (Math.random() - 0.5) * 0.03);
+      }
+    }
+    faceGeo.computeVertexNormals();
+
+    const face = new THREE.Mesh(faceGeo, skinMat);
+    headGroup.add(face);
+
+    // 7. Hair (layered low-poly pieces)
+    const hairGroup = new THREE.Group();
+    headGroup.add(hairGroup);
+
+    // Top hair block
+    const hairTopGeo = new THREE.BoxGeometry(0.78, 0.25, 0.78);
+    const hairTop = new THREE.Mesh(hairTopGeo, hairMat);
+    hairTop.position.set(0, 0.46, -0.02);
+    hairGroup.add(hairTop);
+
+    // Hair details (spikes/tufts)
+    const tuftGeo = new THREE.ConeGeometry(0.18, 0.3, 4);
+    const tufts = [
+      { pos: [0.15, 0.52, 0.2], rot: [0.2, 0, -0.2] },
+      { pos: [-0.15, 0.54, 0.22], rot: [0.3, 0.1, 0.3] },
+      { pos: [0.3, 0.42, 0.1], rot: [0, 0, -0.4] },
+      { pos: [-0.3, 0.44, 0.1], rot: [0, 0, 0.4] },
+      { pos: [0, 0.55, -0.1], rot: [-0.1, 0, 0] },
+    ];
+    tufts.forEach((t) => {
+      const m = new THREE.Mesh(tuftGeo, hairMat);
+      m.position.set(t.pos[0], t.pos[1], t.pos[2]);
+      m.rotation.set(t.rot[0], t.rot[1], t.rot[2]);
+      hairGroup.add(m);
+    });
+
+    // Sideburns / Back hair
+    const sideburnL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 0.2), hairMat);
+    sideburnL.position.set(-0.38, 0.12, 0.05);
+    const sideburnR = sideburnL.clone();
+    sideburnR.position.x = 0.38;
+    hairGroup.add(sideburnL, sideburnR);
+
+    const backHair = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.5, 0.15), hairMat);
+    backHair.position.set(0, 0.15, -0.38);
+    hairGroup.add(backHair);
+
+    // Beard/Stubble (low-poly jaw accent)
+    const beardGeo = new THREE.BoxGeometry(0.76, 0.25, 0.76);
+    const beard = new THREE.Mesh(beardGeo, hairMat);
+    beard.position.set(0, -0.34, 0.03);
+    beard.scale.set(1.02, 1.02, 1.02);
+    headGroup.add(beard);
+
+    // Nose
+    const noseGeo = new THREE.ConeGeometry(0.06, 0.18, 4);
+    const nose = new THREE.Mesh(noseGeo, skinMat);
+    nose.position.set(0, -0.05, 0.39);
+    nose.rotation.x = 0.15;
+    headGroup.add(nose);
+
+    // 8. Sunglasses (Signature item)
+    const glassGroup = new THREE.Group();
+    glassGroup.position.set(0, 0.08, 0.37);
+    headGroup.add(glassGroup);
+
+    // Torus rings for lenses
+    const lensLGeo = new THREE.TorusGeometry(0.13, 0.024, 6, 12);
+    const lensLFrame = new THREE.Mesh(lensLGeo, glassFrameMat);
+    lensLFrame.position.x = -0.2;
+    const lensRFrame = lensLFrame.clone();
+    lensRFrame.position.x = 0.2;
+    glassGroup.add(lensLFrame, lensRFrame);
+
+    // Flat cylinders for actual reflective glass lenses
+    const glassCyl = new THREE.CylinderGeometry(0.12, 0.12, 0.02, 8);
+    glassCyl.rotateX(Math.PI / 2);
+    const lensL = new THREE.Mesh(glassCyl, lensMat);
+    lensL.position.set(-0.2, 0, 0.01);
+    const lensR = lensL.clone();
+    lensR.position.x = 0.2;
+    glassGroup.add(lensL, lensR);
+
+    // Bridge / Temples
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.025, 0.02), glassFrameMat);
+    bridge.position.set(0, 0.05, 0.02);
+    glassGroup.add(bridge);
+
+    const templeL = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.45), glassFrameMat);
+    templeL.position.set(-0.35, 0.05, -0.2);
+    templeL.rotation.y = 0.08;
+    const templeR = templeL.clone();
+    templeR.position.x = 0.35;
+    templeR.rotation.y = -0.08;
+    glassGroup.add(templeL, templeR);
+
+    // ─── Decorative Cyber Ring / Orbitals ────────────────────────────────────
+    const ringGroup = new THREE.Group();
+    ringGroup.position.y = -0.15;
+    scene.add(ringGroup);
+
+    const orbitRingGeo = new THREE.RingGeometry(1.2, 1.22, 64);
+    orbitRingGeo.rotateX(Math.PI / 2);
+    const orbitRingMat = new THREE.MeshBasicMaterial({
+      color: 0xec4899,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.45,
+    });
+    const orbitRing = new THREE.Mesh(orbitRingGeo, orbitRingMat);
+    ringGroup.add(orbitRing);
+
+    // Tiny satellite indicator boxes orbiting the head
+    const satGeo = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+    const satMat = new THREE.MeshStandardMaterial({
+      color: 0x06b6d4,
+      emissive: 0x06b6d4,
+      emissiveIntensity: 0.8,
+    });
+    const satellites: THREE.Mesh[] = [];
+    for (let i = 0; i < 3; i++) {
+      const sat = new THREE.Mesh(satGeo, satMat);
+      const angle = (i * Math.PI * 2) / 3;
+      sat.position.set(Math.cos(angle) * 1.2, 0, Math.sin(angle) * 1.2);
+      ringGroup.add(sat);
+      satellites.push(sat);
+    }
+
+    setLoading(false);
+
+    // ─── Interaction Variables & Events ──────────────────────────────────────
+    let mouseX = 0, mouseY = 0;
+    let targetX = 0, targetY = 0;
+    let isMouseDown = false;
+    let prevMouseX = 0, prevMouseY = 0;
+    let baseRotationY = -Math.PI / 6; // slightly turned by default
+    let baseRotationX = 0.05;
+
+    const onPointerDown = (e: PointerEvent) => {
+      isMouseDown = true;
+      setIsDragging(true);
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      const rect = container.getBoundingClientRect();
+      // Normalized mouse coords for subtle head-tracking when NOT dragging
+      mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      if (isMouseDown) {
+        const deltaX = e.clientX - prevMouseX;
+        const deltaY = e.clientY - prevMouseY;
+        baseRotationY += deltaX * 0.007;
+        baseRotationX += deltaY * 0.007;
+        // Limit vertical rotation to prevent flipping upside down
+        baseRotationX = Math.max(-Math.PI / 6, Math.min(Math.PI / 6, baseRotationX));
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      }
+    };
+
+    const onPointerUp = () => {
+      isMouseDown = false;
+      setIsDragging(false);
+    };
+
+    container.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+
+    // ─── Animation Loop ──────────────────────────────────────────────────────
+    let clock = new THREE.Clock();
+    let animId = 0;
+
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      const time = clock.getElapsedTime();
+
+      // Smooth head-tracking inertia
+      if (!isMouseDown) {
+        // Gently steer head towards the cursor
+        targetX = mouseX * 0.38;
+        targetY = mouseY * 0.18;
+        avatarGroup.rotation.y += (targetX + baseRotationY - avatarGroup.rotation.y) * 0.08;
+        avatarGroup.rotation.x += (targetY + baseRotationX - avatarGroup.rotation.x) * 0.08;
+      } else {
+        // Drag rotation response
+        avatarGroup.rotation.y += (baseRotationY - avatarGroup.rotation.y) * 0.25;
+        avatarGroup.rotation.x += (baseRotationX - avatarGroup.rotation.x) * 0.25;
+      }
+
+      // Idle breathing/bobbing animation
+      avatarGroup.position.y = Math.sin(time * 1.5) * 0.04 - 0.15;
+      headGroup.rotation.z = Math.sin(time * 0.8) * 0.015;
+
+      // Spin the holographic grid orbital ring
+      ringGroup.rotation.y = time * 0.35;
+      ringGroup.rotation.x = Math.sin(time * 0.25) * 0.08; // wobble
+
+      // Orbit satellites and pulse light intensity
+      satellites.forEach((sat, i) => {
+        sat.rotation.y += 0.02;
+        sat.rotation.x += 0.01;
+        sat.position.y = Math.sin(time * 2.0 + i) * 0.08;
+      });
+
+      // Subtle pulse on neon sunglasses emissive intensity
+      lensMat.emissiveIntensity = 0.35 + Math.sin(time * 4) * 0.08;
+
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // ─── Resize Handler ──────────────────────────────────────────────────────
+    const handleResize = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+    window.addEventListener("resize", handleResize);
+
+    // ─── Clean Up ────────────────────────────────────────────────────────────
+    return () => {
+      cancelAnimationFrame(animId);
+      container.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("resize", handleResize);
+      renderer.dispose();
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+      
+      // Dispose geometry/materials
+      scene.clear();
+      [
+        skinMat, jacketMat, shirtMat, hairMat, 
+        glassFrameMat, lensMat, goldAccentMat, orbitRingMat
+      ].forEach(m => m.dispose());
+      [
+        torsoGeo, shirtGeo, leftAccentGeo, neckGeo, 
+        faceGeo, hairTopGeo, tuftGeo, sideburnL.geometry, 
+        backHair.geometry, beardGeo, noseGeo, lensLGeo, 
+        glassCyl, bridge.geometry, templeL.geometry, 
+        orbitRingGeo, satGeo
+      ].forEach(g => g?.dispose());
+    };
+  }, []);
+
+  return (
+    <div 
+      className="relative w-full h-full flex items-center justify-center select-none"
+      style={{ touchAction: "none" }}
+    >
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/20 dark:bg-black/20 backdrop-blur-sm z-10 rounded-xl">
+          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 animate-pulse">
+            Booting 3D System...
+          </span>
+        </div>
+      )}
+
+      {/* 3D Canvas Mount Point */}
+      <div 
+        ref={containerRef} 
+        className={`w-full h-full cursor-grab active:cursor-grabbing transition-all duration-300 ${
+          isDragging ? "scale-98" : ""
+        }`}
+      />
+
+      {/* Minimal drag helper hint */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-[9px] font-mono uppercase tracking-[0.2em] opacity-35 hover:opacity-75 transition-opacity duration-300 pointer-events-none select-none text-center leading-normal">
+        Drag to rotate <br className="md:hidden"/> • Hover to track
+      </div>
+    </div>
+  );
+}
