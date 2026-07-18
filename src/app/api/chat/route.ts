@@ -29,7 +29,7 @@ About Suyash:
 - Technical Skills: React, Next.js, Three.js, WebGL, TypeScript, Python, Node.js, Blockchain, Solidity, Docker, Figma, GSAP, REST APIs, Tailwind CSS.
 - Contact/Links:
   * Email: suyashsingh667@gmail.com
-  * GitHub: https://github.com/suyash-singh28
+  * GitHub: https://github.com/SuyashSingh667
   * LinkedIn: https://linkedin.com (Search: Suyash Singh Bennett University)
 
 Rule of Response:
