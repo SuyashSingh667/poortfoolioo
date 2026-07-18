@@ -236,6 +236,11 @@ export default function InteractiveAvatar3D({
     };
 
     const onPointerMove = (e: PointerEvent) => {
+      if (!isIntersectingRef.current) {
+        mouseX = 0;
+        mouseY = 0;
+        return;
+      }
       const rect = container.getBoundingClientRect();
       // Normalized mouse coords for subtle head-tracking when NOT dragging
       mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -268,7 +273,23 @@ export default function InteractiveAvatar3D({
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      if (!isIntersectingRef.current || (window as any).isThemeTransitioning) return;
+      
+      const isNearNeutral = 
+        (!headObject || (Math.abs(headObject.rotation.y) < 0.01 && Math.abs(headObject.rotation.x) < 0.01)) &&
+        Math.abs(avatarGroup.rotation.y - baseRotationY) < 0.01 &&
+        Math.abs(avatarGroup.rotation.x - baseRotationX) < 0.01;
+
+      if (!isIntersectingRef.current) {
+        mouseX = 0;
+        mouseY = 0;
+        if (isNearNeutral || (window as any).isThemeTransitioning) {
+          // If we are at neutral, stop rendering to save performance/battery
+          renderer.render(scene, camera);
+          return;
+        }
+      } else if ((window as any).isThemeTransitioning) {
+        return;
+      }
       
       const delta = clock.getDelta();
       const time = clock.getElapsedTime();
