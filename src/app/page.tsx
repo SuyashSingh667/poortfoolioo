@@ -204,8 +204,12 @@ export default function Home() {
         body: JSON.stringify({ messages: newMessages })
       });
       const data = await res.json();
-      if (data.choices?.[0]?.message) {
-        setChatMessages([...newMessages, data.choices[0].message]);
+      if (data.reply) {
+        setChatMessages([...newMessages, { role: "assistant", content: data.reply }]);
+      } else if (data.error) {
+        setChatMessages([...newMessages, { role: "assistant", content: `Error: ${data.error}` }]);
+      } else {
+        setChatMessages([...newMessages, { role: "assistant", content: "Hey! I couldn't process that. Feel free to ask again!" }]);
       }
     } catch (err) {
       console.error(err);
