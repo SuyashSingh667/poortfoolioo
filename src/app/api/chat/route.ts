@@ -93,8 +93,11 @@ Rule of Response:
             parts: [{ text: systemPrompt }],
           },
           generationConfig: {
-            maxOutputTokens: 250,
+            maxOutputTokens: 1000,
             temperature: 0.7,
+            thinkingConfig: {
+              thinking_level: "low",
+            },
           },
         }),
       }
@@ -110,6 +113,7 @@ Rule of Response:
     }
 
     const data = await response.json();
+    console.log("Raw Gemini API Response:", JSON.stringify(data, null, 2));
     const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Hey! I couldn't process that. Feel free to ask me again!";
 
     return NextResponse.json({ reply: replyText });
