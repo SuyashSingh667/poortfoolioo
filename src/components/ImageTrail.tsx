@@ -1233,6 +1233,11 @@ export default function ImageTrail({ items = [], variant = 1 }: ImageTrailProps)
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    // Only enable image trail on devices that support hover (non-touch devices)
+    const hasHover = window.matchMedia('(hover: hover)').matches;
+    if (!hasHover) return;
+
     const parent = containerRef.current.parentElement;
     if (!parent) return;
 

@@ -249,28 +249,66 @@ export default function Home() {
   // GSAP horizontal pin for Experiences
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const timer = setTimeout(() => {
-      const container = cardsContainerRef.current;
-      if (!container) return;
-      const scrollWidth = container.scrollWidth;
-      const clientWidth = window.innerWidth;
-      const padding = window.innerWidth >= 768 ? 64 : 24;
-      const xTranslation = -(scrollWidth - clientWidth + padding * 2);
-      if (scrollWidth <= clientWidth) return;
-      const anim = gsap.to(container, { x: xTranslation, ease: "none" });
-      const pinTrigger = ScrollTrigger.create({
-        trigger: "#experiences",
-        start: "top top",
-        end: () => `+=${scrollWidth - clientWidth + padding * 2}`,
-        pin: true,
-        scrub: 0.1,
-        animation: anim,
-        invalidateOnRefresh: true,
+
+    let ctx: gsap.Context | null = null;
+
+    const initGSAP = () => {
+      if (ctx) ctx.revert();
+
+      ctx = gsap.context(() => {
+        const container = cardsContainerRef.current;
+        if (!container) return;
+
+        ScrollTrigger.refresh();
+
+        const getXTranslation = () => {
+          const sWidth = container.scrollWidth;
+          const cWidth = window.innerWidth;
+          const pad = window.innerWidth >= 768 ? 64 : 24;
+          const dist = sWidth - cWidth + pad * 2;
+          return dist > 0 ? -dist : 0;
+        };
+
+        const anim = gsap.to(container, {
+          x: getXTranslation,
+          ease: "none"
+        });
+
+        ScrollTrigger.create({
+          trigger: "#experiences",
+          start: "top top",
+          end: () => {
+            const sWidth = container.scrollWidth;
+            const cWidth = window.innerWidth;
+            const pad = window.innerWidth >= 768 ? 64 : 24;
+            const dist = sWidth - cWidth + pad * 2;
+            return `+=${dist > 0 ? dist : 0}`;
+          },
+          pin: true,
+          scrub: 0.1,
+          animation: anim,
+          invalidateOnRefresh: true,
+        });
       });
-      return () => { pinTrigger.kill(); anim.kill(); };
-    }, 150);
-    return () => clearTimeout(timer);
-  }, [isMobile]);
+    };
+
+    const timer = setTimeout(initGSAP, 200);
+
+    const handleResize = () => {
+      initGSAP();
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+      if (ctx) ctx.revert();
+      const triggerEl = document.getElementById("experiences");
+      ScrollTrigger.getAll().forEach(t => {
+        if (t.trigger === triggerEl) t.kill(true);
+      });
+    };
+  }, []);
 
   const menuItems = projects.map((p) => ({
     image: p.image, link: p.link, title: p.title, description: p.description,
