@@ -1,4 +1,24 @@
 import { NextResponse } from "next/server";
+import { getTopMatches } from "@/lib/retrieval";
+
+async function embedQuery(text: string, apiKey: string): Promise<number[]> {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "models/gemini-embedding-2",
+        content: { parts: [{ text }] },
+      }),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Embedding request failed (${res.status}): ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.embedding.values;
+}
 
 export async function POST(request: Request) {
   try {
@@ -9,6 +29,19 @@ export async function POST(request: Request) {
         { error: "GEMINI_API_KEY environment variable is not configured on the server." },
         { status: 500 }
       );
+    }
+
+    // Retrieve the most relevant persona knowledge for the latest user message
+    const lastUserMessage = [...messages].reverse().find((m: any) => m.role === "user")?.content ?? "";
+    let retrievedContext = "";
+    try {
+      const queryEmbedding = await embedQuery(lastUserMessage, process.env.GEMINI_API_KEY);
+      const matches = getTopMatches(queryEmbedding, 5);
+      retrievedContext = matches
+        .map((m) => `- ${m.text}`)
+        .join("\n");
+    } catch (err) {
+      console.error("Retrieval step failed, falling back to base persona only:", err);
     }
 
     const systemPrompt = `You are the AI Clone of Suyash Singh, speaking on his behalf in his interactive 3D portfolio.
@@ -31,6 +64,8 @@ About Suyash:
   * Email: suyashsingh667@gmail.com
   * GitHub: https://github.com/SuyashSingh667
   * LinkedIn: https://linkedin.com (Search: Suyash Singh Bennett University)
+
+${retrievedContext ? `Relevant personal knowledge for this specific question (use this to answer accurately and in your own voice — don't just repeat it verbatim, blend it naturally into a first-person answer):\n${retrievedContext}\n` : ""}
 
 Rule of Response:
 1. Speak in the first person ("I", "my", "me") as if you are Suyash.

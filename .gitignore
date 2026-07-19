@@ -43,3 +43,8 @@ next-env.d.ts
 # archives
 *.zip
 
+# persona integration
+persona-ai-integration/
+data/persona-embedded.json
+
+
