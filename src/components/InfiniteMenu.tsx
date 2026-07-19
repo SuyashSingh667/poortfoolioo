@@ -58,75 +58,22 @@ uniform sampler2D uTex;
 uniform int uItemCount;
 uniform int uAtlasSize;
 
-uniform vec2 uMouse;
-uniform vec2 uResolution;
-uniform float uPixelRatio;
-
 out vec4 outColor;
 
 in vec2 vUvs;
 in float vAlpha;
 flat in int vInstanceId;
 
-#ifndef PI
-#define PI 3.14159265358979323846
-#endif
-#ifndef TWO_PI
-#define TWO_PI 6.283185307179586
-#endif
-
-vec2 coord(in vec2 p) {
-    p = p / uResolution.xy;
-    if (uResolution.x > uResolution.y) {
-        p.x *= uResolution.x / uResolution.y;
-        p.x += (uResolution.y - uResolution.x) / uResolution.y / 2.0;
-    } else {
-        p.y *= uResolution.y / uResolution.x;
-        p.y += (uResolution.x - uResolution.y) / uResolution.x / 2.0;
-    }
-    p -= 0.5;
-    p *= vec2(-1.0, 1.0);
-    return p;
-}
-
-#define st0 coord(gl_FragCoord.xy)
-#define mx coord(uMouse * uPixelRatio)
-
-float sdRoundRect(vec2 p, vec2 b, float r) {
-    vec2 d = abs(p) - b + vec2(r);
-    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
-}
-
-float sdCircle(in vec2 st, in vec2 center) {
-    return length(st - center) * 2.0;
-}
-
-float aastep(float threshold, float value) {
-    float afwidth = length(vec2(dFdx(value), dFdy(value))) * 0.70710678118654757;
-    return smoothstep(threshold - afwidth, threshold + afwidth, value);
-}
-
-float fill(float x, float size, float edge) {
-    return 1.0 - smoothstep(size - edge, size + edge, x);
-}
-
-float strokeAA(float x, float size, float w, float edge) {
-    float afwidth = length(vec2(dFdx(x), dFdy(x))) * 0.70710678;
-    float d = smoothstep(size - edge - afwidth, size + edge + afwidth, x + w * 0.5)
-            - smoothstep(size - edge - afwidth, size + edge + afwidth, x - w * 0.5);
-    return clamp(d, 0.0, 1.0);
-}
-
 void main() {
     vec2 uv = vUvs - 0.5;
     float dist = length(uv);
-    int itemIndex = vInstanceId % uItemCount;
 
-    // Render the project image in the center (up to dist = 0.35)
-    if (dist <= 0.35) {
-        // Map texture inside the inner circle, scaling it from [0, 0.35] to [0, 0.50]
-        vec2 imageUv = uv * (0.50 / 0.35) + 0.5;
+    // 0.40 is the radius of the inner project image (occupying 80% of the circle)
+    if (dist <= 0.40) {
+        // Map texture inside the inner circle, scaling it from [0, 0.40] to [0, 0.50]
+        vec2 imageUv = uv * (0.50 / 0.40) + 0.5;
 
+        int itemIndex = vInstanceId % uItemCount;
         int cellsPerRow = uAtlasSize;
         int cellX = itemIndex % cellsPerRow;
         int cellY = itemIndex / cellsPerRow;
@@ -149,50 +96,25 @@ void main() {
         outColor = texture(uTex, st);
 
         // Apply a 3D spherical shading shadow overlay on the flat circular image
-        float r = dist / 0.35;
-        float z = sqrt(max(0.0, 1.0 - r * r));
+        float r = dist / 0.40; // ranges from 0.0 to 1.0 inside the image
+        float z = sqrt(max(0.0, 1.0 - r * r)); // hemispherical depth
+        
+        // Shading multiplier: center is 1.0, edge is 0.54 (more defined sphere)
         float shading = z * 0.46 + 0.54;
         outColor.rgb *= shading;
 
         outColor.a *= vAlpha;
     } else {
-        outColor = vec4(0.0);
-    }
-
-    // Now let's calculate the ShapeBlur hover circle blur
-    vec2 posMouse = mx * vec2(1., -1.) + 0.5;
-
-    float size = 0.38; // border size outside the 0.35 image boundary, avoiding WebGL disc boundary clipping
-    float roundness = 0.18; // Highly rounded squircle that matches the circle contours perfectly
-    float borderSize = 0.015; // sleek, elegant border
-    float circleSize = 0.35;
-    float circleEdge = 0.55;
-
-    float sdfCircle = fill(
-        sdCircle(st0 + 0.5, posMouse),
-        circleSize,
-        circleEdge
-    );
-
-    // Let's render the ShapeBlur outline around the circle!
-    // Shape: Highly rounded Squircle centered at 0.0
-    float sdf = sdRoundRect(uv, vec2(size), roundness);
-    
-    // Draw the stroke using the hover circle softness (sdfCircle) for the blur!
-    float strokeMask = strokeAA(sdf, 0.0, borderSize, sdfCircle) * 4.0;
-
-    if (strokeMask > 0.0) {
-        // Use clean white/silver outline (exactly as in the original component design!)
-        vec3 strokeColor = vec3(1.0);
-        outColor = mix(outColor, vec4(strokeColor, vAlpha), strokeMask);
-    }
-
-    // Add outer drop shadow to make the custom shape pop
-    if (outColor.a == 0.0) {
-        vec2 shadowUv = uv - vec2(-0.012, 0.012);
+        // Draw the outer drop shadow in the outer ring (dist from 0.40 to 0.50)
+        // Offset the shadow slightly to the top-left so the shadow drops to the bottom-right
+        vec2 shadowUv = uv - vec2(-0.015, 0.015);
         float shadowDist = length(shadowUv);
+        
+        // Soft gradient fade that vanishes completely before the geometry edge (0.50)
         float shadowFade = smoothstep(0.48, 0.38, shadowDist);
-        outColor = vec4(0.0, 0.0, 0.0, shadowFade * 0.22 * vAlpha);
+        
+        // Render shadow as a semi-transparent black overlay (softer outer shadow)
+        outColor = vec4(0.0, 0.0, 0.0, shadowFade * 0.28 * vAlpha);
     }
 }
 `;
@@ -778,14 +700,6 @@ class InfiniteGridMenu {
   scaleFactor = 1.0;
   movementActive = false;
 
-  mousePos = vec2.create();
-  mouseDamp = vec2.create();
-
-  onPointerMove = (e: PointerEvent) => {
-    const rect = this.canvas.getBoundingClientRect();
-    vec2.set(this.mousePos, e.clientX - rect.left, e.clientY - rect.top);
-  };
-
   constructor(canvas: HTMLCanvasElement, items: any[], onActiveItemChange: (index: number) => void, onMovementChange: (isMoving: boolean) => void, onInit: ((sk: InfiniteGridMenu) => void) | null = null, scale = 1.0) {
     this.canvas = canvas;
     this.items = items || [];
@@ -793,7 +707,6 @@ class InfiniteGridMenu {
     this.onMovementChange = onMovementChange || (() => {});
     this.scaleFactor = scale;
     this.camera.position[2] = 3 * scale;
-    this.canvas.addEventListener('pointermove', this.onPointerMove);
     this.#init(onInit);
   }
 
@@ -859,10 +772,7 @@ class InfiniteGridMenu {
       uTex: gl.getUniformLocation(this.discProgram, 'uTex'),
       uFrames: gl.getUniformLocation(this.discProgram, 'uFrames'),
       uItemCount: gl.getUniformLocation(this.discProgram, 'uItemCount'),
-      uAtlasSize: gl.getUniformLocation(this.discProgram, 'uAtlasSize'),
-      uMouse: gl.getUniformLocation(this.discProgram, 'uMouse'),
-      uResolution: gl.getUniformLocation(this.discProgram, 'uResolution'),
-      uPixelRatio: gl.getUniformLocation(this.discProgram, 'uPixelRatio')
+      uAtlasSize: gl.getUniformLocation(this.discProgram, 'uAtlasSize')
     };
 
     this.discGeo = new DiscGeometry(56, 1);
@@ -975,12 +885,6 @@ class InfiniteGridMenu {
     const gl = this.gl;
     this.control.update(deltaTime, this.TARGET_FRAME_DURATION);
 
-    // Calculate damping for mouse position
-    const dt = deltaTime * 0.001;
-    const k = 1 - Math.exp(-8 * dt);
-    this.mouseDamp[0] += (this.mousePos[0] - this.mouseDamp[0]) * k;
-    this.mouseDamp[1] += (this.mousePos[1] - this.mouseDamp[1]) * k;
-
     let positions = this.instancePositions.map(p => vec3.transformQuat(vec3.create(), p, this.control.orientation));
     const scale = 0.25;
     const SCALE_INTENSITY = 0.6;
@@ -1033,10 +937,6 @@ class InfiniteGridMenu {
 
     gl.uniform1i(this.discLocations.uItemCount, this.items.length);
     gl.uniform1i(this.discLocations.uAtlasSize, this.atlasSize);
-
-    gl.uniform2f(this.discLocations.uMouse, this.mouseDamp[0], this.mouseDamp[1]);
-    gl.uniform2f(this.discLocations.uResolution, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.uniform1f(this.discLocations.uPixelRatio, Math.min(window.devicePixelRatio || 1, 2));
 
     gl.uniform1f(this.discLocations.uFrames, this.#frames);
     gl.uniform1f(this.discLocations.uScaleFactor, this.scaleFactor);
@@ -1126,20 +1026,6 @@ class InfiniteGridMenu {
     const nearestVertexPos = this.instancePositions[index];
     return vec3.transformQuat(vec3.create(), nearestVertexPos, this.control.orientation);
   }
-
-  destroy() {
-    this.canvas.removeEventListener('pointermove', this.onPointerMove);
-    const gl = this.gl;
-    if (this.tex) {
-      gl.deleteTexture(this.tex);
-    }
-    if (this.discVAO) {
-      gl.deleteVertexArray(this.discVAO);
-    }
-    if (this.discProgram) {
-      gl.deleteProgram(this.discProgram);
-    }
-  }
 }
 
 const defaultItems = [
@@ -1212,9 +1098,6 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (sketch) {
-        sketch.destroy();
-      }
     };
   }, [items, scale]);
 
