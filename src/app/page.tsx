@@ -32,19 +32,19 @@ const projects: Project[] = [
   {
     title: "VoteSamvidhan",
     description: "Blockchain-backed election integrity with constitutional literacy — secure digital voting, transparent verification, and real-time dashboards.",
-    image: "/images/projects/web_experiment.png",
+    image: "/images/projects/votesamvidhan.jpg",
     link: "https://github.com/SuyashSingh667/VoteSamvidhan",
   },
   {
     title: "SkySentinel",
     description: "Space situational awareness platform monitoring satellite risks in Earth's orbit, integrating live TLE data with interactive 3D visualisation.",
-    image: "/images/projects/dashboard_ui.png",
+    image: "/images/projects/skysentinel.png",
     link: "https://github.com/SuyashSingh667/SkySentinel",
   },
   {
     title: "Tribe",
     description: "Centralised campus clubs and events hub with custom calendar-based planning, event discovery, and light AI recommendations.",
-    image: "/images/projects/editorial_portfolio.png",
+    image: "/images/projects/tribe.png",
     link: "https://github.com/SuyashSingh667/Tribe",
   },
 ];
