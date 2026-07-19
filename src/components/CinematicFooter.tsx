@@ -345,10 +345,10 @@ export function CinematicFooter() {
 
               {/* Secondary Text Links */}
               <div className="flex flex-wrap justify-center gap-3 md:gap-6 w-full mt-2">
-                <MagneticButton as="a" href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="footer-glass-pill px-6 py-3 rounded-full text-muted-foreground font-medium text-xs md:text-sm hover:text-foreground">
+                <MagneticButton as="a" href="https://www.linkedin.com/in/suyash-singh-/" target="_blank" rel="noopener noreferrer" className="footer-glass-pill px-6 py-3 rounded-full text-muted-foreground font-medium text-xs md:text-sm hover:text-foreground">
                   LinkedIn
                 </MagneticButton>
-                <MagneticButton as="a" href="#" className="footer-glass-pill px-6 py-3 rounded-full text-muted-foreground font-medium text-xs md:text-sm hover:text-foreground">
+                <MagneticButton as="a" href="/suyash_singh_resume.pdf" download="Suyash_Singh_Resume.pdf" className="footer-glass-pill px-6 py-3 rounded-full text-muted-foreground font-medium text-xs md:text-sm hover:text-foreground">
                   Resume
                 </MagneticButton>
               </div>

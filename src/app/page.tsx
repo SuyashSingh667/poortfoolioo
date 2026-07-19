@@ -53,38 +53,39 @@ const experiences = [
   {
     num: "01",
     org: "IIT Kanpur",
-    role: "Software Development & Analytics Intern",
-    desc: "Re-engineered the DoRA Giveaway Portal, integrated RESTful APIs, and built live CSR tracking dashboards.",
-    tags: ["React.js", "REST APIs", "Data Dashboards"],
+    role: "Software Dev & Research Intern",
+    desc: "Re-engineered the DoRA Giveaway Portal using React.js. Architected real-time analytical dashboards using JavaScript and the Fetch API, consuming REST endpoints to enable live CSR data tracking.",
+    tags: ["React.js", "REST APIs", "Dashboards", "IIT Kanpur"],
   },
   {
     num: "02",
-    org: "SAIL Bokaro Steel",
+    org: "SAIL Bokaro Steel Plant",
     role: "Project Intern",
-    desc: "Production data analysis under the Chief General Manager — plant performance metrics, trend identification, and control-workflow studies.",
-    tags: ["Data Analysis", "Process Automation", "Reporting"],
+    desc: "Analyzed plant production and process data under the CGM to identify trends. Prepared structured technical reports and process documentation summarizing plant performance metrics for review.",
+    tags: ["Data Analysis", "Process Data", "Technical Writing"],
   },
   {
     num: "03",
-    org: "CodeChef BU",
-    role: "Chapter President",
-    desc: "Directed core operations and organised 10+ coding contests and technical events with 1 000+ cumulative participants.",
-    tags: ["Leadership", "Event Planning", "Community"],
+    org: "CodeChef Bennett University",
+    role: "President — CodeChef Chapter",
+    desc: "Led and organized 10+ coding contests and technical events with over 1000+ cumulative participants. Managed core team operations, event coordination, and marketing outreach.",
+    tags: ["Leadership", "Event Management", "Operations"],
   },
   {
     num: "04",
     org: "Bennett University",
-    role: "B.Tech CSE — Cloud Computing",
-    desc: "Studying Computer Science with a Cloud Computing specialisation. CGPA 8.98 (2024 – 2028).",
-    tags: ["Cloud Computing", "DSA", "B.Tech CSE"],
+    role: "B.Tech Computer Science",
+    desc: "Specialization in Cloud Computing. CGPA: 8.98 / 10. Relevant courses: Data Structures, Analysis of Algorithms, Design of Cloud Architectural Solutions, React, DBMS.",
+    tags: ["Cloud Computing", "DSA & Algorithms", "React & DBMS"],
   },
 ];
 
 const SKILLS = [
-  "React", "Next.js", "TypeScript", "Three.js", "WebGL",
-  "Python", "Node.js", "Blockchain", "Cloud Computing",
-  "UI/UX", "Figma", "Docker", "REST APIs", "GSAP",
-  "Framer Motion", "Tailwind CSS", "Solidity",
+  "Python", "C++", "SQL", "React.js", "Three.js",
+  "AWS", "Lambda", "DynamoDB", "Cognito", "API Gateway",
+  "REST APIs", "MySQL", "Spring Boot", "Git", "GitHub",
+  "DSA", "Operating Systems", "Computer Networks", "Cloud Computing",
+  "Next.js", "TypeScript", "Tailwind CSS",
 ];
 
 // ─── Reveal wrapper ───────────────────────────────────────────────────────────
