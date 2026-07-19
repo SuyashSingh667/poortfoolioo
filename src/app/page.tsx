@@ -15,7 +15,6 @@ import MeshText from "@/components/MeshText";
 import InteractiveAvatar3D from "@/components/InteractiveAvatar3D";
 import { CinematicFooter } from "@/components/CinematicFooter";
 import { motion, useScroll, useSpring } from "framer-motion";
-import ShapeBlur from "@/components/ShapeBlur";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -378,21 +377,7 @@ export default function Home() {
 
       <section id="work" className="relative h-screen w-full overflow-hidden bg-white dark:bg-[#0c0c0c] border-b border-black/5 dark:border-white/5 transition-colors duration-500 p-4 md:p-8">
         <div className="h-full w-full rounded-[24px] md:rounded-[40px] overflow-hidden border border-black/5 dark:border-white/5 relative">
-          {/* Background ShapeBlur shader effect */}
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-25 dark:opacity-30">
-            <ShapeBlur
-              variation={0}
-              pixelRatioProp={typeof window !== "undefined" ? window.devicePixelRatio : 2}
-              shapeSize={1.2}
-              roundness={0.4}
-              borderSize={0.05}
-              circleSize={0.3}
-              circleEdge={0.5}
-            />
-          </div>
-          <div className="relative z-10 h-full w-full">
-            <InfiniteMenu items={menuItems} scale={1.0} />
-          </div>
+          <InfiniteMenu items={menuItems} scale={1.0} />
         </div>
       </section>
 

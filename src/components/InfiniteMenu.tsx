@@ -64,16 +64,35 @@ in vec2 vUvs;
 in float vAlpha;
 flat in int vInstanceId;
 
+#define PI 3.14159265358979323846
+#define TWO_PI 6.283185307179586
+
+float sdRoundRect(vec2 p, vec2 b, float r) {
+    vec2 d = abs(p - 0.5) * 4.2 - b + vec2(r);
+    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
+}
+
+float sdCircle(in vec2 st, in vec2 center) {
+    return length(st - center) * 2.0;
+}
+
+float sdPoly(in vec2 p, in float w, in int sides) {
+    float a = atan(p.x, p.y) + PI;
+    float r = TWO_PI / float(sides);
+    float d = cos(floor(0.5 + a / r) * r - a) * length(max(abs(p) * 1.0, 0.0));
+    return d * 2.0 - w;
+}
+
 void main() {
     vec2 uv = vUvs - 0.5;
     float dist = length(uv);
+    int itemIndex = vInstanceId % uItemCount;
 
-    // 0.40 is the radius of the inner project image (occupying 80% of the circle)
-    if (dist <= 0.40) {
-        // Map texture inside the inner circle, scaling it from [0, 0.40] to [0, 0.50]
-        vec2 imageUv = uv * (0.50 / 0.40) + 0.5;
+    // Render the project image in the center (up to dist = 0.35)
+    if (dist <= 0.35) {
+        // Map texture inside the inner circle, scaling it from [0, 0.35] to [0, 0.50]
+        vec2 imageUv = uv * (0.50 / 0.35) + 0.5;
 
-        int itemIndex = vInstanceId % uItemCount;
         int cellsPerRow = uAtlasSize;
         int cellX = itemIndex % cellsPerRow;
         int cellY = itemIndex / cellsPerRow;
@@ -96,25 +115,58 @@ void main() {
         outColor = texture(uTex, st);
 
         // Apply a 3D spherical shading shadow overlay on the flat circular image
-        float r = dist / 0.40; // ranges from 0.0 to 1.0 inside the image
-        float z = sqrt(max(0.0, 1.0 - r * r)); // hemispherical depth
-        
-        // Shading multiplier: center is 1.0, edge is 0.54 (more defined sphere)
+        float r = dist / 0.35;
+        float z = sqrt(max(0.0, 1.0 - r * r));
         float shading = z * 0.46 + 0.54;
         outColor.rgb *= shading;
 
         outColor.a *= vAlpha;
     } else {
-        // Draw the outer drop shadow in the outer ring (dist from 0.40 to 0.50)
-        // Offset the shadow slightly to the top-left so the shadow drops to the bottom-right
-        vec2 shadowUv = uv - vec2(-0.015, 0.015);
+        outColor = vec4(0.0);
+    }
+
+    // Now let's render the unique ShapeBlur outline around the circle!
+    float sdf = 1.0;
+    vec2 st = vUvs;
+
+    // Unique border shape for each circle
+    if (itemIndex == 0) {
+        // SkySentinel: Rounded Squircle border
+        sdf = sdRoundRect(st, vec2(1.15), 0.3);
+    } else if (itemIndex == 1) {
+        // Tribe: Triangle border (tilted slightly upward)
+        sdf = sdPoly(st - vec2(0.5, 0.47), 0.72, 3);
+    } else {
+        // VoteSamvidhan: Hexagon border
+        sdf = sdPoly(st - vec2(0.5), 0.76, 6);
+    }
+
+    // Border thickness and smooth antialiased stroke Mask
+    float borderThickness = 0.05;
+    float borderSoftness = 0.015;
+    float strokeMask = smoothstep(borderThickness + borderSoftness, borderThickness, abs(sdf)) 
+                     * smoothstep(-borderSoftness, 0.0, abs(sdf));
+
+    if (strokeMask > 0.0) {
+        // Specific glowing color for each project
+        vec3 strokeColor;
+        if (itemIndex == 0) {
+            strokeColor = vec3(0.0, 0.65, 1.0);    // Neon blue/cyan for SkySentinel
+        } else if (itemIndex == 1) {
+            strokeColor = vec3(1.0, 0.22, 0.22);    // Crimson red for Tribe
+        } else {
+            strokeColor = vec3(0.95, 0.62, 0.05);   // Golden yellow for VoteSamvidhan
+        }
+
+        outColor = mix(outColor, vec4(strokeColor, vAlpha), strokeMask);
+    }
+
+    // Add outer drop shadow to make the custom shape pop
+    if (outColor.a == 0.0) {
+        vec2 shadowUv = uv - vec2(-0.012, 0.012);
         float shadowDist = length(shadowUv);
-        
-        // Soft gradient fade that vanishes completely before the geometry edge (0.50)
         float shadowFade = smoothstep(0.48, 0.38, shadowDist);
-        
-        // Render shadow as a semi-transparent black overlay (softer outer shadow)
-        outColor = vec4(0.0, 0.0, 0.0, shadowFade * 0.28 * vAlpha);
+        outColor = vec4(0.0, 0.0, 0.0, shadowFade * 0.22 * vAlpha);
     }
 }
 `;
