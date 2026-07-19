@@ -1248,7 +1248,7 @@ export default function ImageTrail({ items = [], variant = 1 }: ImageTrailProps)
     <div className="content" ref={containerRef}>
       {items.map((url, i) => (
         <div className="content__img" key={i}>
-          <div className="content__img-inner" style={{ backgroundImage: `url(${encodeURI(url)})` }} />
+          <div className="content__img-inner" style={{ backgroundImage: `url("${encodeURI(url)}")` }} />
         </div>
       ))}
     </div>
