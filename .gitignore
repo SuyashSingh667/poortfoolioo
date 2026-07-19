@@ -47,4 +47,7 @@ next-env.d.ts
 persona-ai-integration/
 data/persona-embedded.json
 
+# duplicate root experience folder
+/experience/
+
 

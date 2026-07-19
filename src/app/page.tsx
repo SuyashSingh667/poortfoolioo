@@ -15,6 +15,7 @@ import MeshText from "@/components/MeshText";
 import InteractiveAvatar3D from "@/components/InteractiveAvatar3D";
 import { CinematicFooter } from "@/components/CinematicFooter";
 import { motion, useScroll, useSpring } from "framer-motion";
+import ImageTrail from "@/components/ImageTrail";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -78,6 +79,23 @@ const experiences = [
     desc: "Specialization in Cloud Computing. CGPA: 8.98 / 10. Relevant courses: Data Structures, Analysis of Algorithms, Design of Cloud Architectural Solutions, React, DBMS.",
     tags: ["Cloud Computing", "DSA & Algorithms", "React & DBMS"],
   },
+];
+
+const EXPERIENCE_IMAGES = [
+  "/experience/WhatsApp Image 2026-07-19 at 22.37.57.jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.37.57 (1).jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.37.58.jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.37.58 (1).jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.37.59.jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.37.59 (1).jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.37.59 (2).jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.38.00.jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.38.00 (1).jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.38.01.jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.38.01 (1).jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.38.01 (2).jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.38.03.jpeg",
+  "/experience/WhatsApp Image 2026-07-19 at 22.38.03 (1).jpeg",
 ];
 
 const SKILLS = [
@@ -391,7 +409,8 @@ export default function Home() {
         id="experiences"
         className="relative z-20 h-screen w-full bg-white dark:bg-[#0a0a0a] border-b border-black/5 dark:border-white/5 transition-colors duration-500 overflow-hidden flex items-center"
       >
-        <div className="w-full overflow-hidden">
+        <ImageTrail items={EXPERIENCE_IMAGES} variant={1} />
+        <div className="w-full overflow-hidden relative z-10">
           <div
             ref={cardsContainerRef}
             className="flex gap-0 px-6 md:px-16"
