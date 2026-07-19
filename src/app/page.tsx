@@ -410,6 +410,20 @@ export default function Home() {
         className="relative z-20 h-screen w-full bg-white dark:bg-[#0a0a0a] border-b border-black/5 dark:border-white/5 transition-colors duration-500 overflow-hidden flex items-center"
       >
         <ImageTrail items={EXPERIENCE_IMAGES} variant={1} />
+
+        {/* Floating Instruction Badge */}
+        <div className="absolute bottom-8 right-6 md:right-16 z-20 pointer-events-none select-none">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/8 dark:border-white/8 bg-[#fafafa]/60 dark:bg-black/60 backdrop-blur-md transition-all duration-300">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span>
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+              Move cursor to reveal images
+            </span>
+          </div>
+        </div>
+
         <div className="w-full overflow-hidden relative z-10">
           <div
             ref={cardsContainerRef}
