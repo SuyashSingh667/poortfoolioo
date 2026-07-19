@@ -270,6 +270,7 @@ export default function InteractiveAvatar3D({
     // ─── Animation Loop ──────────────────────────────────────────────────────
     let clock = new THREE.Clock();
     let animId = 0;
+    let wasIntersecting = false;
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
@@ -282,6 +283,7 @@ export default function InteractiveAvatar3D({
       if (!isIntersectingRef.current) {
         mouseX = 0;
         mouseY = 0;
+        wasIntersecting = false;
         if (isNearNeutral || (window as any).isThemeTransitioning) {
           // If we are at neutral, stop rendering to save performance/battery
           renderer.render(scene, camera);
@@ -291,7 +293,13 @@ export default function InteractiveAvatar3D({
         return;
       }
       
-      const delta = clock.getDelta();
+      // If we transitioned from hidden to visible, consume the stale delta
+      if (!wasIntersecting) {
+        clock.getDelta(); // Clear the delta accumulator
+        wasIntersecting = true;
+      }
+      
+      const delta = Math.min(clock.getDelta(), 0.1);
       const time = clock.getElapsedTime();
 
       // Update character animation clip mixer
