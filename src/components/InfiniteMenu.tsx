@@ -93,7 +93,7 @@ vec2 coord(in vec2 p) {
 #define mx coord(uMouse * uPixelRatio)
 
 float sdRoundRect(vec2 p, vec2 b, float r) {
-    vec2 d = abs(p - 0.5) * 4.2 - b + vec2(r);
+    vec2 d = abs(p) - b + vec2(r);
     return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
 }
 
@@ -162,9 +162,9 @@ void main() {
     // Now let's calculate the ShapeBlur hover circle blur
     vec2 posMouse = mx * vec2(1., -1.) + 0.5;
 
-    float size = 1.15;
-    float roundness = 0.90; // Highly rounded squircle that matches the circle contours perfectly
-    float borderSize = 0.05;
+    float size = 0.38; // border size outside the 0.35 image boundary, avoiding WebGL disc boundary clipping
+    float roundness = 0.18; // Highly rounded squircle that matches the circle contours perfectly
+    float borderSize = 0.015; // sleek, elegant border
     float circleSize = 0.35;
     float circleEdge = 0.55;
 
@@ -175,8 +175,8 @@ void main() {
     );
 
     // Let's render the ShapeBlur outline around the circle!
-    // Shape: Highly rounded Squircle (variation 0)
-    float sdf = sdRoundRect(vUvs, vec2(size), roundness);
+    // Shape: Highly rounded Squircle centered at 0.0
+    float sdf = sdRoundRect(uv, vec2(size), roundness);
     
     // Draw the stroke using the hover circle softness (sdfCircle) for the blur!
     float strokeMask = strokeAA(sdf, 0.0, borderSize, sdfCircle) * 4.0;
