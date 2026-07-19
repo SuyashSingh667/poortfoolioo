@@ -58,14 +58,39 @@ uniform sampler2D uTex;
 uniform int uItemCount;
 uniform int uAtlasSize;
 
+uniform vec2 uMouse;
+uniform vec2 uResolution;
+uniform float uPixelRatio;
+
 out vec4 outColor;
 
 in vec2 vUvs;
 in float vAlpha;
 flat in int vInstanceId;
 
+#ifndef PI
 #define PI 3.14159265358979323846
+#endif
+#ifndef TWO_PI
 #define TWO_PI 6.283185307179586
+#endif
+
+vec2 coord(in vec2 p) {
+    p = p / uResolution.xy;
+    if (uResolution.x > uResolution.y) {
+        p.x *= uResolution.x / uResolution.y;
+        p.x += (uResolution.y - uResolution.x) / uResolution.y / 2.0;
+    } else {
+        p.y *= uResolution.y / uResolution.x;
+        p.y += (uResolution.x - uResolution.y) / uResolution.x / 2.0;
+    }
+    p -= 0.5;
+    p *= vec2(-1.0, 1.0);
+    return p;
+}
+
+#define st0 coord(gl_FragCoord.xy)
+#define mx coord(uMouse * uPixelRatio)
 
 float sdRoundRect(vec2 p, vec2 b, float r) {
     vec2 d = abs(p - 0.5) * 4.2 - b + vec2(r);
@@ -76,11 +101,20 @@ float sdCircle(in vec2 st, in vec2 center) {
     return length(st - center) * 2.0;
 }
 
-float sdPoly(in vec2 p, in float w, in int sides) {
-    float a = atan(p.x, p.y) + PI;
-    float r = TWO_PI / float(sides);
-    float d = cos(floor(0.5 + a / r) * r - a) * length(max(abs(p) * 1.0, 0.0));
-    return d * 2.0 - w;
+float aastep(float threshold, float value) {
+    float afwidth = length(vec2(dFdx(value), dFdy(value))) * 0.70710678118654757;
+    return smoothstep(threshold - afwidth, threshold + afwidth, value);
+}
+
+float fill(float x, float size, float edge) {
+    return 1.0 - smoothstep(size - edge, size + edge, x);
+}
+
+float strokeAA(float x, float size, float w, float edge) {
+    float afwidth = length(vec2(dFdx(x), dFdy(x))) * 0.70710678;
+    float d = smoothstep(size - edge - afwidth, size + edge + afwidth, x + w * 0.5)
+            - smoothstep(size - edge - afwidth, size + edge + afwidth, x - w * 0.5);
+    return clamp(d, 0.0, 1.0);
 }
 
 void main() {
@@ -125,39 +159,31 @@ void main() {
         outColor = vec4(0.0);
     }
 
-    // Now let's render the unique ShapeBlur outline around the circle!
-    float sdf = 1.0;
-    vec2 st = vUvs;
+    // Now let's calculate the ShapeBlur hover circle blur
+    vec2 posMouse = mx * vec2(1., -1.) + 0.5;
 
-    // Unique border shape for each circle
-    if (itemIndex == 0) {
-        // SkySentinel: Rounded Squircle border
-        sdf = sdRoundRect(st, vec2(1.15), 0.3);
-    } else if (itemIndex == 1) {
-        // Tribe: Triangle border (tilted slightly upward)
-        sdf = sdPoly(st - vec2(0.5, 0.47), 0.72, 3);
-    } else {
-        // VoteSamvidhan: Hexagon border
-        sdf = sdPoly(st - vec2(0.5), 0.76, 6);
-    }
+    float size = 1.15;
+    float roundness = 0.90; // Highly rounded squircle that matches the circle contours perfectly
+    float borderSize = 0.05;
+    float circleSize = 0.35;
+    float circleEdge = 0.55;
 
-    // Border thickness and smooth antialiased stroke Mask
-    float borderThickness = 0.05;
-    float borderSoftness = 0.015;
-    float strokeMask = smoothstep(borderThickness + borderSoftness, borderThickness, abs(sdf)) 
-                     * smoothstep(-borderSoftness, 0.0, abs(sdf));
+    float sdfCircle = fill(
+        sdCircle(st0 + 0.5, posMouse),
+        circleSize,
+        circleEdge
+    );
+
+    // Let's render the ShapeBlur outline around the circle!
+    // Shape: Highly rounded Squircle (variation 0)
+    float sdf = sdRoundRect(vUvs, vec2(size), roundness);
+    
+    // Draw the stroke using the hover circle softness (sdfCircle) for the blur!
+    float strokeMask = strokeAA(sdf, 0.0, borderSize, sdfCircle) * 4.0;
 
     if (strokeMask > 0.0) {
-        // Specific glowing color for each project
-        vec3 strokeColor;
-        if (itemIndex == 0) {
-            strokeColor = vec3(0.0, 0.65, 1.0);    // Neon blue/cyan for SkySentinel
-        } else if (itemIndex == 1) {
-            strokeColor = vec3(1.0, 0.22, 0.22);    // Crimson red for Tribe
-        } else {
-            strokeColor = vec3(0.95, 0.62, 0.05);   // Golden yellow for VoteSamvidhan
-        }
-
+        // Use clean white/silver outline (exactly as in the original component design!)
+        vec3 strokeColor = vec3(1.0);
         outColor = mix(outColor, vec4(strokeColor, vAlpha), strokeMask);
     }
 
@@ -752,6 +778,14 @@ class InfiniteGridMenu {
   scaleFactor = 1.0;
   movementActive = false;
 
+  mousePos = vec2.create();
+  mouseDamp = vec2.create();
+
+  onPointerMove = (e: PointerEvent) => {
+    const rect = this.canvas.getBoundingClientRect();
+    vec2.set(this.mousePos, e.clientX - rect.left, e.clientY - rect.top);
+  };
+
   constructor(canvas: HTMLCanvasElement, items: any[], onActiveItemChange: (index: number) => void, onMovementChange: (isMoving: boolean) => void, onInit: ((sk: InfiniteGridMenu) => void) | null = null, scale = 1.0) {
     this.canvas = canvas;
     this.items = items || [];
@@ -759,6 +793,7 @@ class InfiniteGridMenu {
     this.onMovementChange = onMovementChange || (() => {});
     this.scaleFactor = scale;
     this.camera.position[2] = 3 * scale;
+    this.canvas.addEventListener('pointermove', this.onPointerMove);
     this.#init(onInit);
   }
 
@@ -824,7 +859,10 @@ class InfiniteGridMenu {
       uTex: gl.getUniformLocation(this.discProgram, 'uTex'),
       uFrames: gl.getUniformLocation(this.discProgram, 'uFrames'),
       uItemCount: gl.getUniformLocation(this.discProgram, 'uItemCount'),
-      uAtlasSize: gl.getUniformLocation(this.discProgram, 'uAtlasSize')
+      uAtlasSize: gl.getUniformLocation(this.discProgram, 'uAtlasSize'),
+      uMouse: gl.getUniformLocation(this.discProgram, 'uMouse'),
+      uResolution: gl.getUniformLocation(this.discProgram, 'uResolution'),
+      uPixelRatio: gl.getUniformLocation(this.discProgram, 'uPixelRatio')
     };
 
     this.discGeo = new DiscGeometry(56, 1);
@@ -937,6 +975,12 @@ class InfiniteGridMenu {
     const gl = this.gl;
     this.control.update(deltaTime, this.TARGET_FRAME_DURATION);
 
+    // Calculate damping for mouse position
+    const dt = deltaTime * 0.001;
+    const k = 1 - Math.exp(-8 * dt);
+    this.mouseDamp[0] += (this.mousePos[0] - this.mouseDamp[0]) * k;
+    this.mouseDamp[1] += (this.mousePos[1] - this.mouseDamp[1]) * k;
+
     let positions = this.instancePositions.map(p => vec3.transformQuat(vec3.create(), p, this.control.orientation));
     const scale = 0.25;
     const SCALE_INTENSITY = 0.6;
@@ -989,6 +1033,10 @@ class InfiniteGridMenu {
 
     gl.uniform1i(this.discLocations.uItemCount, this.items.length);
     gl.uniform1i(this.discLocations.uAtlasSize, this.atlasSize);
+
+    gl.uniform2f(this.discLocations.uMouse, this.mouseDamp[0], this.mouseDamp[1]);
+    gl.uniform2f(this.discLocations.uResolution, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.uniform1f(this.discLocations.uPixelRatio, Math.min(window.devicePixelRatio || 1, 2));
 
     gl.uniform1f(this.discLocations.uFrames, this.#frames);
     gl.uniform1f(this.discLocations.uScaleFactor, this.scaleFactor);
@@ -1078,6 +1126,20 @@ class InfiniteGridMenu {
     const nearestVertexPos = this.instancePositions[index];
     return vec3.transformQuat(vec3.create(), nearestVertexPos, this.control.orientation);
   }
+
+  destroy() {
+    this.canvas.removeEventListener('pointermove', this.onPointerMove);
+    const gl = this.gl;
+    if (this.tex) {
+      gl.deleteTexture(this.tex);
+    }
+    if (this.discVAO) {
+      gl.deleteVertexArray(this.discVAO);
+    }
+    if (this.discProgram) {
+      gl.deleteProgram(this.discProgram);
+    }
+  }
 }
 
 const defaultItems = [
@@ -1150,6 +1212,9 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (sketch) {
+        sketch.destroy();
+      }
     };
   }, [items, scale]);
 
