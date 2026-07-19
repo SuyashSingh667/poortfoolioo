@@ -15,6 +15,7 @@ import MeshText from "@/components/MeshText";
 import InteractiveAvatar3D from "@/components/InteractiveAvatar3D";
 import { CinematicFooter } from "@/components/CinematicFooter";
 import { motion, useScroll, useSpring } from "framer-motion";
+import ShapeBlur from "@/components/ShapeBlur";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -32,19 +33,19 @@ const projects: Project[] = [
   {
     title: "SkySentinel",
     description: "Space situational awareness platform monitoring satellite risks in Earth's orbit, integrating live TLE data with interactive 3D visualisation.",
-    image: "/images/projects/skysentinel.png",
+    image: "/images/projects/skysentinel.png?v=3",
     link: "https://github.com/SuyashSingh667/SkySentinel",
   },
   {
     title: "Tribe",
     description: "Centralised campus clubs and events hub with custom calendar-based planning, event discovery, and light AI recommendations.",
-    image: "/images/projects/tribe.png",
+    image: "/images/projects/tribe.png?v=3",
     link: "https://github.com/SuyashSingh667/Tribe",
   },
   {
     title: "VoteSamvidhan",
     description: "Blockchain-backed election integrity with constitutional literacy — secure digital voting, transparent verification, and real-time dashboards.",
-    image: "/images/projects/votesamvidhan.jpg",
+    image: "/images/projects/votesamvidhan.jpg?v=3",
     link: "https://github.com/SuyashSingh667/VoteSamvidhan",
   },
 ];
@@ -377,7 +378,21 @@ export default function Home() {
 
       <section id="work" className="relative h-screen w-full overflow-hidden bg-white dark:bg-[#0c0c0c] border-b border-black/5 dark:border-white/5 transition-colors duration-500 p-4 md:p-8">
         <div className="h-full w-full rounded-[24px] md:rounded-[40px] overflow-hidden border border-black/5 dark:border-white/5 relative">
-          <InfiniteMenu items={menuItems} scale={1.0} />
+          {/* Background ShapeBlur shader effect */}
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-25 dark:opacity-30">
+            <ShapeBlur
+              variation={0}
+              pixelRatioProp={typeof window !== "undefined" ? window.devicePixelRatio : 2}
+              shapeSize={1.2}
+              roundness={0.4}
+              borderSize={0.05}
+              circleSize={0.3}
+              circleEdge={0.5}
+            />
+          </div>
+          <div className="relative z-10 h-full w-full">
+            <InfiniteMenu items={menuItems} scale={1.0} />
+          </div>
         </div>
       </section>
 
