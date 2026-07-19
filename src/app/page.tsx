@@ -611,21 +611,47 @@ export default function Home() {
               --glass-bg: rgba(255, 255, 255, 0.02);
               --glass-bg-strong: rgba(255, 255, 255, 0.05);
               --glass-border: rgba(255, 255, 255, 0.1);
+              --glass-border-hover: rgba(255, 255, 255, 0.18);
               --glass-highlight: rgba(255, 255, 255, 0.15);
               --text-primary: rgba(255, 255, 255, 0.9);
               --text-secondary: rgba(255, 255, 255, 0.6);
               --text-muted: rgba(255, 255, 255, 0.35);
+              --chip-icon-bg: rgba(255, 255, 255, 0.04);
+              --chip-icon-border: rgba(255, 255, 255, 0.1);
+              --bubble-ai-bg: rgba(255, 255, 255, 0.02);
+              --bubble-ai-border: rgba(255, 255, 255, 0.08);
+              --bubble-user-bg: rgba(255, 255, 255, 0.07);
+              --bubble-user-border: rgba(255, 255, 255, 0.15);
+              --input-bg: rgba(255, 255, 255, 0.03);
+              --input-border: rgba(255, 255, 255, 0.08);
+              --send-btn-bg: rgba(255, 255, 255, 0.9);
+              --send-btn-hover: #ffffff;
+              --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3), inset 0 1px 1px var(--glass-highlight), inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+              --border-gradient: linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0) 28%, rgba(255,255,255,0) 65%, rgba(0,0,0,0.1) 100%);
             }
 
             /* Light theme overrides */
             .liquid-glass-slab-light {
-              --glass-bg: rgba(0, 0, 0, 0.01);
-              --glass-bg-strong: rgba(0, 0, 0, 0.03);
+              --glass-bg: rgba(255, 255, 255, 0.45);
+              --glass-bg-strong: rgba(255, 255, 255, 0.75);
               --glass-border: rgba(0, 0, 0, 0.08);
-              --glass-highlight: rgba(0, 0, 0, 0.05);
-              --text-primary: #171717;
-              --text-secondary: rgba(23, 23, 23, 0.6);
-              --text-muted: rgba(23, 23, 23, 0.35);
+              --glass-border-hover: rgba(0, 0, 0, 0.15);
+              --glass-highlight: rgba(255, 255, 255, 0.6);
+              --text-primary: #18181b;
+              --text-secondary: #52525b;
+              --text-muted: #a1a1aa;
+              --chip-icon-bg: rgba(0, 0, 0, 0.03);
+              --chip-icon-border: rgba(0, 0, 0, 0.08);
+              --bubble-ai-bg: rgba(0, 0, 0, 0.03);
+              --bubble-ai-border: rgba(0, 0, 0, 0.06);
+              --bubble-user-bg: rgba(0, 0, 0, 0.05);
+              --bubble-user-border: rgba(0, 0, 0, 0.1);
+              --input-bg: rgba(0, 0, 0, 0.03);
+              --input-border: rgba(0, 0, 0, 0.08);
+              --send-btn-bg: #18181b;
+              --send-btn-hover: #09090b;
+              --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.06), inset 0 1px 1px var(--glass-highlight), inset 0 -1px 2px rgba(0, 0, 0, 0.05);
+              --border-gradient: linear-gradient(160deg, rgba(255,255,255,0.65), rgba(255,255,255,0) 28%, rgba(255,255,255,0) 65%, rgba(0,0,0,0.04) 100%);
             }
 
             .liquid-glass-card {
@@ -639,10 +665,7 @@ export default function Home() {
               padding: 20px;
               background: var(--glass-bg);
               border: 1px solid var(--glass-border);
-              box-shadow:
-                0 20px 40px -10px rgba(0, 0, 0, 0.3),
-                inset 0 1px 1px var(--glass-highlight),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+              box-shadow: var(--card-shadow);
               backdrop-filter: blur(16px) saturate(140%);
               -webkit-backdrop-filter: blur(16px) saturate(140%);
               color: var(--text-primary);
@@ -665,7 +688,7 @@ export default function Home() {
               inset: 0;
               border-radius: inherit;
               padding: 1px;
-              background: linear-gradient(160deg, rgba(255,255,255,0.15), rgba(255,255,255,0) 28%, rgba(255,255,255,0) 65%, rgba(0,0,0,0.1) 100%);
+              background: var(--border-gradient);
               -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
               -webkit-mask-composite: xor;
               mask-composite: exclude;
@@ -679,7 +702,7 @@ export default function Home() {
               padding: 10px 12px;
               border-radius: 14px;
               background: var(--glass-bg);
-              border: 1px solid rgba(255,255,255,0.06);
+              border: 1px solid var(--glass-border);
               color: var(--text-primary);
               font-size: 12px;
               font-weight: 500;
@@ -692,7 +715,7 @@ export default function Home() {
 
             .liquid-chip:hover {
               background: var(--glass-bg-strong);
-              border-color: rgba(255,255,255,0.15);
+              border-color: var(--glass-border-hover);
               transform: translateY(-0.5px);
             }
 
@@ -706,8 +729,8 @@ export default function Home() {
               display: flex;
               align-items: center;
               justify-content: center;
-              background: rgba(255,255,255,0.04);
-              border: 1px solid rgba(255,255,255,0.1);
+              background: var(--chip-icon-bg);
+              border: 1px solid var(--chip-icon-border);
             }
 
             .liquid-input-bar {
@@ -716,8 +739,8 @@ export default function Home() {
               gap: 8px;
               padding: 4px 6px 4px 14px;
               border-radius: 999px;
-              background: rgba(255,255,255,0.03);
-              border: 1px solid rgba(255,255,255,0.08);
+              background: var(--input-bg);
+              border: 1px solid var(--input-border);
               backdrop-filter: blur(10px);
               -webkit-backdrop-filter: blur(10px);
             }
@@ -726,7 +749,7 @@ export default function Home() {
               width: 30px;
               height: 30px;
               border-radius: 50%;
-              background: rgba(255, 255, 255, 0.9);
+              background: var(--send-btn-bg);
               border: none;
               display: flex;
               align-items: center;
@@ -735,21 +758,21 @@ export default function Home() {
               flex-shrink: 0;
               transition: transform 0.15s ease, background 0.2s ease;
             }
-            .liquid-send-btn:hover { background: #fff; }
+            .liquid-send-btn:hover { background: var(--send-btn-hover); }
             .liquid-send-btn:active { transform: scale(0.92); }
             .liquid-send-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 
             .liquid-bubble-ai {
-              background: rgba(255, 255, 255, 0.02);
-              border: 1px solid rgba(255, 255, 255, 0.08);
+              background: var(--bubble-ai-bg);
+              border: 1px solid var(--bubble-ai-border);
               backdrop-filter: blur(6px);
               border-radius: 16px;
               border-bottom-left-radius: 4px;
             }
 
             .liquid-bubble-user {
-              background: rgba(255, 255, 255, 0.07);
-              border: 1px solid rgba(255, 255, 255, 0.15);
+              background: var(--bubble-user-bg);
+              border: 1px solid var(--bubble-user-border);
               backdrop-filter: blur(6px);
               border-radius: 16px;
               border-bottom-right-radius: 4px;
@@ -760,13 +783,13 @@ export default function Home() {
             {/* Header */}
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <div className="flex items-center gap-2 text-xs font-semibold tracking-wide">
-                <svg className="w-3.5 h-3.5 text-white/70 dark:text-white/70" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-3.5 h-3.5 text-zinc-500 dark:text-white/70" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/>
                   <path d="M19 15l.8 2.6L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.4L19 15z" opacity="0.7"/>
                 </svg>
                 <span className="text-[11px] font-sans font-medium tracking-widest uppercase opacity-70">Curious? Ask!</span>
               </div>
-              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-white/5 border border-white/5 text-white/40 hover:text-white/80 cursor-pointer hover:bg-white/10 transition-all">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-zinc-800/5 dark:bg-white/5 border border-zinc-950/10 dark:border-white/5 text-zinc-500 dark:text-white/40 hover:text-zinc-800 dark:hover:text-white/80 hover:bg-zinc-800/10 dark:hover:bg-white/10 transition-all cursor-pointer">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                   <circle cx="5" cy="12" r="1.6"/>
                   <circle cx="12" cy="12" r="1.6"/>
@@ -780,8 +803,8 @@ export default function Home() {
               /* Hero Intro & Suggestion Chips Grid */
               <div className="flex-1 flex flex-col justify-center my-auto transition-all duration-300">
                 <div className="text-center mb-5">
-                  <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-1 select-none text-white/80">Hello.</h2>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">How can I help you today?</p>
+                  <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-1 select-none text-zinc-800 dark:text-white/90">Hello.</h2>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">How can I help you today?</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mb-3">
@@ -836,8 +859,8 @@ export default function Home() {
                     <div
                       className={`px-4 py-2.5 text-xs md:text-sm leading-relaxed ${
                         msg.role === "user"
-                          ? "liquid-bubble-user text-white dark:text-white"
-                          : "liquid-bubble-ai text-white/90 dark:text-white/90"
+                          ? "liquid-bubble-user text-zinc-800 dark:text-white"
+                          : "liquid-bubble-ai text-zinc-700 dark:text-white/90"
                       }`}
                     >
                       {msg.content}
@@ -848,9 +871,9 @@ export default function Home() {
                 {chatLoading && (
                   <div className="flex items-start max-w-[85%]">
                     <div className="px-4 py-2.5 liquid-bubble-ai flex gap-1.5 items-center">
-                      <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <span className="w-1.5 h-1.5 bg-zinc-400 dark:bg-white/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 bg-zinc-400 dark:bg-white/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 bg-zinc-400 dark:bg-white/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                     </div>
                   </div>
                 )}
@@ -859,7 +882,7 @@ export default function Home() {
 
             {/* Input Bar */}
             <form onSubmit={handleSendMessage} className="liquid-input-bar mt-auto flex-shrink-0">
-              <svg className="w-4.5 h-4.5 text-white/40 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="w-4.5 h-4.5 text-zinc-400 dark:text-white/40 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="7"/>
                 <path d="M21 21l-4.3-4.3" strokeLinecap="round"/>
               </svg>
@@ -869,7 +892,7 @@ export default function Home() {
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Ask anything..."
                 disabled={chatLoading}
-                className="flex-1 bg-transparent border-none outline-none text-xs md:text-sm text-white placeholder-white/30 focus:ring-0 focus:outline-none py-2"
+                className="flex-1 bg-transparent border-none outline-none text-xs md:text-sm text-zinc-800 dark:text-white placeholder-zinc-400 dark:placeholder-white/30 focus:ring-0 focus:outline-none py-2"
               />
               <button
                 type="submit"
@@ -877,7 +900,7 @@ export default function Home() {
                 className="liquid-send-btn"
                 aria-label="Send message"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-4 h-4 text-zinc-800">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" className="w-4 h-4 text-white dark:text-zinc-800">
                   <path d="M5 12h14" strokeLinecap="round"/>
                   <path d="M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
