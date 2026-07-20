@@ -197,6 +197,76 @@ export default function Home() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // ─── Section Tracking & Refresh Scroll Restoration ──────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Set scrollRestoration to manual so Next.js/browser doesn't reset scroll before layout completes
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const sectionIds = ["hero", "work", "experiences", "skillset", "about", "contact"];
+
+    const restoreScroll = () => {
+      const currentHash = window.location.hash.replace("#", "") || sessionStorage.getItem("suyash_current_section");
+      if (currentHash) {
+        const targetEl = document.getElementById(currentHash);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: "instant", block: "start" });
+          return;
+        }
+      }
+      const savedY = sessionStorage.getItem("suyash_scroll_y");
+      if (savedY) {
+        window.scrollTo({ top: parseInt(savedY, 10), behavior: "instant" });
+      }
+    };
+
+    // Delay scroll restoration slightly to ensure GSAP ScrollTrigger & 3D models initialize layout
+    const restoreTimer = setTimeout(restoreScroll, 350);
+
+    // Track visible section as user scrolls and sync URL hash + sessionStorage
+    const observerCallback: IntersectionObserverCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+          const id = entry.target.id;
+          if (id) {
+            sessionStorage.setItem("suyash_current_section", id);
+            sessionStorage.setItem("suyash_scroll_y", String(window.scrollY));
+            if (window.location.hash !== `#${id}`) {
+              window.history.replaceState(null, "", `#${id}`);
+            }
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, {
+      threshold: [0.2, 0.5]
+    });
+
+    // Observe all sections once mounted
+    const timer = setTimeout(() => {
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      });
+    }, 100);
+
+    const handleScroll = () => {
+      sessionStorage.setItem("suyash_scroll_y", String(window.scrollY));
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      clearTimeout(restoreTimer);
+      clearTimeout(timer);
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([
     { role: "assistant", content: "Hey! I'm Suyash's AI clone. Ask me anything about his work, experience, or skills!" }
   ]);
