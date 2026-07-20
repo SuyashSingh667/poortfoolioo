@@ -59,6 +59,22 @@
   box-shadow: 0 6px 16px rgba(255, 255, 255, 0.08);
 }
 
+@keyframes click-me-pulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 0 16px 4px rgba(249, 115, 22, 0.5);
+  }
+}
+
+.action-button.click-me-prompt {
+  animation: click-me-pulse 2s infinite ease-in-out;
+  border: 1.5px solid rgba(249, 115, 22, 0.8) !important;
+}
+
 .action-button-icon {
   user-select: none;
   position: relative;
