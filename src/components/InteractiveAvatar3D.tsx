@@ -148,12 +148,12 @@ export default function InteractiveAvatar3D({
         modelWrap = new THREE.Group();
         modelWrap.add(model);
 
-        // Scale the model wrap to fit nicely (target height increased from 3.7 to 4.4)
-        const scale = 4.4 / size.y;
+        // Scale the model wrap to fit nicely with good proportions
+        const scale = 3.8 / size.y;
         modelWrap.scale.setScalar(scale);
 
-        // Adjust position so it sits higher in the scene viewport (shifted upwards)
-        modelWrap.position.y = 0.6;
+        // Adjust Y position so the entire head and body fit comfortably within the camera frame
+        modelWrap.position.y = -0.1;
 
         avatarGroup.add(modelWrap);
 
