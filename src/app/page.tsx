@@ -141,7 +141,7 @@ function SkillsMarquee() {
 }
 
 // ─── Bold editorial section header ────────────────────────────────────────────
-function Chapter({ num, eyebrow, title, extra }: { num: string; eyebrow: string; title: string; extra?: React.ReactNode }) {
+function Chapter({ num, eyebrow, title }: { num: string; eyebrow: string; title: string }) {
   const { resolvedTheme } = useTheme();
   const textColor = resolvedTheme === "dark" ? "#ffffff" : "#171717";
 
@@ -155,18 +155,11 @@ function Chapter({ num, eyebrow, title, extra }: { num: string; eyebrow: string;
       >
         {num}
       </span>
-      <Reveal className="relative z-10 space-y-3 w-full">
-        <div className="flex flex-wrap items-center justify-between gap-4 pr-12 md:pr-32">
-          <span className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.38em] text-zinc-400 dark:text-zinc-500">
-            <span className="w-5 h-px bg-zinc-400 dark:bg-zinc-500 inline-block" />
-            {eyebrow}
-          </span>
-          {extra && (
-            <div className="select-none">
-              {extra}
-            </div>
-          )}
-        </div>
+      <Reveal className="relative z-10 space-y-3">
+        <span className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.38em] text-zinc-400 dark:text-zinc-500">
+          <span className="w-5 h-px bg-zinc-400 dark:bg-zinc-500 inline-block" />
+          {eyebrow}
+        </span>
         <div className="w-full h-[64px] sm:h-[100px] md:h-[130px] lg:h-[160px] -ml-2 select-none">
           <MeshText
             text={title}
@@ -518,28 +511,26 @@ export default function Home() {
       {/* ════════════════════════════════════════════════════════════════════════
           02 — EXPERIENCES
       ════════════════════════════════════════════════════════════════════════ */}
-      <Chapter
-        num="02"
-        eyebrow="Journey"
-        title="Experience."
-        extra={
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/10 dark:border-white/10 bg-[#fafafa]/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md transition-all duration-300 shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-            </span>
-            <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.2em] font-medium text-zinc-600 dark:text-zinc-300">
-              Move cursor to reveal images
-            </span>
-          </div>
-        }
-      />
+      <Chapter num="02" eyebrow="Journey" title="Experience." />
 
       <section
         id="experiences"
         className="relative z-20 h-screen w-full bg-white dark:bg-[#0a0a0a] border-b border-black/5 dark:border-white/5 transition-colors duration-500 overflow-hidden flex items-center"
       >
         <ImageTrail items={EXPERIENCE_IMAGES} variant={1} />
+
+        {/* Prominent Instruction Badge positioned at top-left of the Experience section */}
+        <div className="absolute top-6 left-6 md:left-16 z-30 pointer-events-none select-none">
+          <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-black/10 dark:border-white/12 bg-white/85 dark:bg-black/85 backdrop-blur-xl shadow-lg transition-all duration-300">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+            </span>
+            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.22em] font-semibold text-zinc-700 dark:text-zinc-200">
+              Move cursor to reveal images
+            </span>
+          </div>
+        </div>
 
         <div className="w-full overflow-hidden relative z-10">
           <div
