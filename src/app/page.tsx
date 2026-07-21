@@ -201,47 +201,56 @@ export default function Home() {
 
   // ─── Skills 7-Second Arcade Challenge State ────────────────────────────────
   const [gameState, setGameState] = useState<"idle" | "playing" | "won" | "lost">("idle");
-  const [timeLeft, setTimeLeft] = useState(700);
+  const [timeLeftMs, setTimeLeftMs] = useState(7000);
   const [ballsInBin, setBallsInBin] = useState(12);
   const [bestScore, setBestScore] = useState<number | null>(null);
   const [resetKey, setResetKey] = useState(0);
 
+  const startTimeRef = useRef<number>(0);
+
+  // Smooth & Accurate Stopwatch Countdown using requestAnimationFrame
   useEffect(() => {
     if (gameState !== "playing") return;
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 10) {
-          clearInterval(timer);
-          setGameState("lost");
-          return 0;
-        }
-        return prev - 10;
-      });
-    }, 100);
+    startTimeRef.current = performance.now();
+    let animId = 0;
 
-    return () => clearInterval(timer);
+    const updateTimer = () => {
+      const elapsed = performance.now() - startTimeRef.current;
+      const remaining = Math.max(0, 7000 - elapsed);
+      setTimeLeftMs(remaining);
+
+      if (remaining <= 0) {
+        setGameState("lost");
+      } else {
+        animId = requestAnimationFrame(updateTimer);
+      }
+    };
+
+    animId = requestAnimationFrame(updateTimer);
+    return () => cancelAnimationFrame(animId);
   }, [gameState]);
 
+  // Victory check when all 12 balls are cleared out of the bin
   useEffect(() => {
-    if (gameState === "playing" && ballsInBin === 0) {
+    if (gameState === "playing" && ballsInBin === 0 && timeLeftMs < 6700) {
       setGameState("won");
-      const timeTaken = (700 - timeLeft) / 100;
+      const timeTaken = (7000 - timeLeftMs) / 1000;
       setBestScore((prev) => (prev === null ? timeTaken : Math.min(prev, timeTaken)));
     }
-  }, [ballsInBin, gameState, timeLeft]);
+  }, [ballsInBin, gameState, timeLeftMs]);
 
   const handleStartGame = () => {
     setResetKey((prev) => prev + 1);
     setBallsInBin(12);
-    setTimeLeft(700);
+    setTimeLeftMs(7000);
     setGameState("playing");
   };
 
   const handleResetGame = () => {
     setResetKey((prev) => prev + 1);
     setBallsInBin(12);
-    setTimeLeft(700);
+    setTimeLeftMs(7000);
     setGameState("idle");
   };
 
@@ -679,7 +688,7 @@ export default function Home() {
                 <span className={`font-mono font-black text-4xl md:text-5xl tracking-tight leading-none mt-1 block ${
                   gameState === "playing" ? "text-orange-500 animate-pulse" : gameState === "won" ? "text-emerald-500" : gameState === "lost" ? "text-rose-500" : "text-zinc-900 dark:text-white"
                 }`}>
-                  {(timeLeft / 100).toFixed(2)}<span className="text-lg font-mono">s</span>
+                  {(timeLeftMs / 1000).toFixed(2)}<span className="text-lg font-mono">s</span>
                 </span>
               </div>
 
@@ -699,7 +708,7 @@ export default function Home() {
                 <span className="text-lg">🎉</span>
                 <div>
                   <p className="font-bold uppercase tracking-wider">SPEED DEMON! YOU WIN!</p>
-                  <p className="text-[11px] opacity-90">Cleared in {((700 - timeLeft) / 100).toFixed(2)} seconds!</p>
+                  <p className="text-[11px] opacity-90">Cleared in {((7000 - timeLeftMs) / 1000).toFixed(2)} seconds!</p>
                 </div>
               </div>
             )}

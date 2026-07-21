@@ -413,7 +413,7 @@ export default function PaperBinSkillset({
       // Stack above the rimY
       const y    = rimY - 60 - row * vSp;
       const body = M.Bodies.circle(x, y, BALL_D/2, bOpts);
-      body.plugin.isInsideBin = false; // starts outside, joins bin when passing rim
+      body.plugin.isInsideBin = true; // starts as true, inside/entering bin
       bodies.push(body);
     }
     M.Composite.add(engine.world, bodies);
