@@ -383,7 +383,10 @@ function createShader(gl: WebGL2RenderingContext, type: number, source: string):
     return shader;
   }
 
-  console.error(gl.getShaderInfoLog(shader));
+  const infoLog = gl.getShaderInfoLog(shader);
+  if (infoLog && infoLog.trim()) {
+    console.warn("Shader compile note:", infoLog);
+  }
   gl.deleteShader(shader);
   return null;
 }
@@ -428,6 +431,15 @@ function createProgram(
     gl.detachShader(program, shader);
     gl.deleteShader(shader);
   });
+
+  if (!success) {
+    const programLog = gl.getProgramInfoLog(program);
+    if (programLog && programLog.trim()) {
+      console.warn("Program link note:", programLog);
+    }
+    gl.deleteProgram(program);
+    return null;
+  }
 
   if (success) {
     return program;
