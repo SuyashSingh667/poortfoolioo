@@ -234,7 +234,15 @@ function initBin(
 }
 
 // ─── Component ────────────────────────────────────────────────────────────
-export default function PaperBinSkillset({ theme }: { theme?: string }) {
+export default function PaperBinSkillset({
+  theme,
+  onCountChange,
+  resetKey,
+}: {
+  theme?: string;
+  onCountChange?: (insideCount: number) => void;
+  resetKey?: number;
+}) {
   const outerRef    = useRef<HTMLDivElement>(null);
   const physRef     = useRef<HTMLDivElement>(null);
   const backCanvasR = useRef<HTMLCanvasElement>(null);
@@ -244,6 +252,11 @@ export default function PaperBinSkillset({ theme }: { theme?: string }) {
   const elRefs      = useRef<(HTMLDivElement | null)[]>([]);
   const pxRef       = useRef<BinPx | null>(null);
   const isIntersectingRef = useRef(false);
+  const onCountChangeRef = useRef(onCountChange);
+
+  useEffect(() => {
+    onCountChangeRef.current = onCountChange;
+  }, [onCountChange]);
 
   useEffect(() => {
     const outer = outerRef.current;
@@ -520,13 +533,21 @@ export default function PaperBinSkillset({ theme }: { theme?: string }) {
       // 3. Clamp post-update to fix any solver penetration
       clampPositions();
 
-      for (let i=0;i<bodies.length;i++) {
-        const div=elRefs.current[i]; if(!div) continue;
-        const {position,angle}=bodies[i];
-        div.style.visibility="visible";
-        div.style.left=`${position.x}px`;
-        div.style.top=`${position.y}px`;
-        div.style.transform=`translate(-50%,-50%) rotate(${angle}rad)`;
+      let insideCount = 0;
+      for (let i = 0; i < bodies.length; i++) {
+        if (bodies[i].plugin.isInsideBin) {
+          insideCount++;
+        }
+        const div = elRefs.current[i];
+        if (!div) continue;
+        const { position, angle } = bodies[i];
+        div.style.visibility = "visible";
+        div.style.left = `${position.x}px`;
+        div.style.top = `${position.y}px`;
+        div.style.transform = `translate(-50%,-50%) rotate(${angle}rad)`;
+      }
+      if (onCountChangeRef.current) {
+        onCountChangeRef.current(insideCount);
       }
     };
     loop();
@@ -539,7 +560,7 @@ export default function PaperBinSkillset({ theme }: { theme?: string }) {
       M.Engine.clear(engine);
       engineRef.current=null;
     };
-  }, [ready, ballUrls.length]);
+  }, [ready, ballUrls.length, resetKey]);
 
   return (
     <div

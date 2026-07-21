@@ -199,6 +199,52 @@ export default function Home() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // ─── Skills 7-Second Arcade Challenge State ────────────────────────────────
+  const [gameState, setGameState] = useState<"idle" | "playing" | "won" | "lost">("idle");
+  const [timeLeft, setTimeLeft] = useState(700);
+  const [ballsInBin, setBallsInBin] = useState(12);
+  const [bestScore, setBestScore] = useState<number | null>(null);
+  const [resetKey, setResetKey] = useState(0);
+
+  useEffect(() => {
+    if (gameState !== "playing") return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 10) {
+          clearInterval(timer);
+          setGameState("lost");
+          return 0;
+        }
+        return prev - 10;
+      });
+    }, 100);
+
+    return () => clearInterval(timer);
+  }, [gameState]);
+
+  useEffect(() => {
+    if (gameState === "playing" && ballsInBin === 0) {
+      setGameState("won");
+      const timeTaken = (700 - timeLeft) / 100;
+      setBestScore((prev) => (prev === null ? timeTaken : Math.min(prev, timeTaken)));
+    }
+  }, [ballsInBin, gameState, timeLeft]);
+
+  const handleStartGame = () => {
+    setResetKey((prev) => prev + 1);
+    setBallsInBin(12);
+    setTimeLeft(700);
+    setGameState("playing");
+  };
+
+  const handleResetGame = () => {
+    setResetKey((prev) => prev + 1);
+    setBallsInBin(12);
+    setTimeLeft(700);
+    setGameState("idle");
+  };
+
   // ─── Section Tracking & Refresh Scroll Restoration ──────────────────────────
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -592,59 +638,99 @@ export default function Home() {
         <div className="absolute top-1/3 left-[5%] w-[400px] h-[400px] bg-orange-500/6 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row gap-10 items-center relative z-10">
-          {/* Left: text */}
+          {/* Left: Interactive 7-Second Arcade Challenge Card */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[36%] space-y-8 shrink-0"
+            className="w-full md:w-[38%] space-y-6 shrink-0 bg-white/70 dark:bg-black/70 backdrop-blur-xl border border-black/10 dark:border-white/10 p-6 md:p-8 rounded-3xl shadow-xl select-none"
           >
-            {/* Bold headline */}
-            <div>
-              <h3
-                className="font-black uppercase tracking-tighter leading-[0.88] text-[#171717] dark:text-white"
-                style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)" }}
-              >
-                Built<br />
-                <span className="text-zinc-300 dark:text-zinc-700">Different.</span>
-              </h3>
-            </div>
-
-            {/* Tagline */}
-            <p className="text-[14px] text-zinc-500 dark:text-zinc-400 leading-[1.7] max-w-[280px]">
-              Not just buzzwords on a résumé —<br />
-              <span className="text-[#171717] dark:text-white font-medium">battle-tested tools</span> I ship with daily.
-            </p>
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-3 gap-4 pt-2">
-              {[
-                { value: "16+", label: "Skills" },
-                { value: "3+", label: "Projects" },
-                { value: "2+", label: "Years" },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <span className="block font-black text-2xl md:text-3xl tracking-tight text-[#171717] dark:text-white leading-none">
-                    {stat.value}
-                  </span>
-                  <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 mt-1.5">
-                    {stat.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Tech stack pills */}
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {["React", "Three.js", "WebGL", "TypeScript", "Next.js"].map((t) => (
-                <span
-                  key={t}
-                  className="px-2.5 py-1 rounded-full border border-black/8 dark:border-white/8 bg-black/[0.03] dark:bg-white/[0.03] font-mono text-[8px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
-                >
-                  {t}
+            {/* Arcade Header Badge */}
+            <div className="flex items-center justify-between">
+              <div className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.3em] text-orange-500 font-bold">
+                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                Arcade Challenge ⏱️
+              </div>
+              {bestScore !== null && (
+                <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-500 font-semibold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  Best: {bestScore.toFixed(2)}s 🏆
                 </span>
-              ))}
+              )}
+            </div>
+
+            {/* Main Headline */}
+            <div>
+              <h3 className="font-black uppercase tracking-tight leading-none text-zinc-900 dark:text-white text-2xl md:text-3xl">
+                7-Second<br />
+                <span className="text-orange-500">Dustbin Dash!</span>
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2.5 leading-relaxed">
+                Fling all <span className="font-semibold text-zinc-800 dark:text-zinc-200">12 paper skill balls</span> out of the bin in under <span className="font-semibold text-orange-500">7.0 seconds</span> to win!
+              </p>
+            </div>
+
+            {/* Digital Stopwatch HUD */}
+            <div className="bg-black/5 dark:bg-white/5 border border-black/8 dark:border-white/8 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <span className="block font-mono text-[9px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                  STOPWATCH
+                </span>
+                <span className={`font-mono font-black text-4xl md:text-5xl tracking-tight leading-none mt-1 block ${
+                  gameState === "playing" ? "text-orange-500 animate-pulse" : gameState === "won" ? "text-emerald-500" : gameState === "lost" ? "text-rose-500" : "text-zinc-900 dark:text-white"
+                }`}>
+                  {(timeLeft / 100).toFixed(2)}<span className="text-lg font-mono">s</span>
+                </span>
+              </div>
+
+              <div className="text-right">
+                <span className="block font-mono text-[9px] uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                  IN BIN
+                </span>
+                <span className="font-mono font-bold text-2xl md:text-3xl text-zinc-800 dark:text-zinc-200 leading-none mt-1 block">
+                  {ballsInBin} <span className="text-xs font-mono text-zinc-400">/ 12</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Game Status Banner */}
+            {gameState === "won" && (
+              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-2.5">
+                <span className="text-lg">🎉</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider">SPEED DEMON! YOU WIN!</p>
+                  <p className="text-[11px] opacity-90">Cleared in {((700 - timeLeft) / 100).toFixed(2)} seconds!</p>
+                </div>
+              </div>
+            )}
+
+            {gameState === "lost" && (
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-medium flex items-center gap-2.5">
+                <span className="text-lg">⏰</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider">TIME'S UP!</p>
+                  <p className="text-[11px] opacity-90">{ballsInBin} balls left in the bin. Try again!</p>
+                </div>
+              </div>
+            )}
+
+            {/* Action Controls */}
+            <div className="flex gap-3 pt-1">
+              {gameState === "idle" || gameState === "won" || gameState === "lost" ? (
+                <button
+                  onClick={handleStartGame}
+                  className="flex-1 py-3.5 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-mono text-xs font-bold uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>⏱️</span> {gameState === "idle" ? "Start 7s Challenge" : "Play Again"}
+                </button>
+              ) : (
+                <button
+                  onClick={handleResetGame}
+                  className="flex-1 py-3.5 px-5 rounded-xl bg-zinc-800 hover:bg-zinc-900 active:scale-[0.98] text-white font-mono text-xs font-bold uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>🔄</span> Reset Game
+                </button>
+              )}
             </div>
           </motion.div>
 
@@ -654,9 +740,9 @@ export default function Home() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[64%] h-[65vh] md:h-[72vh] relative"
+            className="w-full md:w-[62%] h-[65vh] md:h-[72vh] relative"
           >
-            <PaperBinSkillset theme={resolvedTheme} />
+            <PaperBinSkillset theme={resolvedTheme} onCountChange={setBallsInBin} resetKey={resetKey} />
           </motion.div>
         </div>
       </section>
