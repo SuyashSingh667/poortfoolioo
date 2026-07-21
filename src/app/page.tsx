@@ -184,6 +184,7 @@ function Chapter({ num, eyebrow, title }: { num: string; eyebrow: string; title:
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const cardsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -191,6 +192,7 @@ export default function Home() {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
   useEffect(() => {
+    setMounted(true);
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -849,7 +851,7 @@ export default function Home() {
             }
           ` }} />
 
-          <div className={`liquid-glass-card ${resolvedTheme === "light" ? "liquid-glass-slab-light" : ""}`}>
+          <div suppressHydrationWarning className={`liquid-glass-card ${mounted && resolvedTheme === "light" ? "liquid-glass-slab-light" : ""}`}>
             {/* Header */}
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <div className="flex items-center gap-2 text-xs font-semibold tracking-wide">
