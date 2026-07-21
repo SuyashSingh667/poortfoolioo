@@ -146,7 +146,7 @@ function Chapter({ num, eyebrow, title, extra }: { num: string; eyebrow: string;
   const textColor = resolvedTheme === "dark" ? "#ffffff" : "#171717";
 
   return (
-    <div className="relative overflow-hidden bg-[#fafafa] dark:bg-[#0a0a0a] transition-colors duration-500 px-6 md:px-16 pt-20 pb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="relative overflow-hidden bg-[#fafafa] dark:bg-[#0a0a0a] transition-colors duration-500 px-6 md:px-16 pt-20 pb-10">
       {/* Ghost number */}
       <span
         aria-hidden
@@ -155,11 +155,18 @@ function Chapter({ num, eyebrow, title, extra }: { num: string; eyebrow: string;
       >
         {num}
       </span>
-      <Reveal className="relative z-10 space-y-3">
-        <span className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.38em] text-zinc-400 dark:text-zinc-500">
-          <span className="w-5 h-px bg-zinc-400 dark:bg-zinc-500 inline-block" />
-          {eyebrow}
-        </span>
+      <Reveal className="relative z-10 space-y-3 w-full">
+        <div className="flex flex-wrap items-center justify-between gap-4 pr-12 md:pr-32">
+          <span className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.38em] text-zinc-400 dark:text-zinc-500">
+            <span className="w-5 h-px bg-zinc-400 dark:bg-zinc-500 inline-block" />
+            {eyebrow}
+          </span>
+          {extra && (
+            <div className="select-none">
+              {extra}
+            </div>
+          )}
+        </div>
         <div className="w-full h-[64px] sm:h-[100px] md:h-[130px] lg:h-[160px] -ml-2 select-none">
           <MeshText
             text={title}
@@ -177,12 +184,6 @@ function Chapter({ num, eyebrow, title, extra }: { num: string; eyebrow: string;
           />
         </div>
       </Reveal>
-
-      {extra && (
-        <div className="relative z-10 md:mb-4 select-none self-start md:self-auto">
-          {extra}
-        </div>
-      )}
     </div>
   );
 }
