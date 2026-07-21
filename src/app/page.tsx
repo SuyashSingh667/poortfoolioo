@@ -141,12 +141,12 @@ function SkillsMarquee() {
 }
 
 // ─── Bold editorial section header ────────────────────────────────────────────
-function Chapter({ num, eyebrow, title }: { num: string; eyebrow: string; title: string }) {
+function Chapter({ num, eyebrow, title, extra }: { num: string; eyebrow: string; title: string; extra?: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
   const textColor = resolvedTheme === "dark" ? "#ffffff" : "#171717";
 
   return (
-    <div className="relative overflow-hidden bg-[#fafafa] dark:bg-[#0a0a0a] transition-colors duration-500 px-6 md:px-16 pt-20 pb-10">
+    <div className="relative overflow-hidden bg-[#fafafa] dark:bg-[#0a0a0a] transition-colors duration-500 px-6 md:px-16 pt-20 pb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
       {/* Ghost number */}
       <span
         aria-hidden
@@ -177,6 +177,12 @@ function Chapter({ num, eyebrow, title }: { num: string; eyebrow: string; title:
           />
         </div>
       </Reveal>
+
+      {extra && (
+        <div className="relative z-10 md:mb-4 select-none self-start md:self-auto">
+          {extra}
+        </div>
+      )}
     </div>
   );
 }
@@ -511,26 +517,28 @@ export default function Home() {
       {/* ════════════════════════════════════════════════════════════════════════
           02 — EXPERIENCES
       ════════════════════════════════════════════════════════════════════════ */}
-      <Chapter num="02" eyebrow="Journey" title="Experience." />
+      <Chapter
+        num="02"
+        eyebrow="Journey"
+        title="Experience."
+        extra={
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/10 dark:border-white/10 bg-[#fafafa]/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md transition-all duration-300 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+            </span>
+            <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.2em] font-medium text-zinc-600 dark:text-zinc-300">
+              Move cursor to reveal images
+            </span>
+          </div>
+        }
+      />
 
       <section
         id="experiences"
         className="relative z-20 h-screen w-full bg-white dark:bg-[#0a0a0a] border-b border-black/5 dark:border-white/5 transition-colors duration-500 overflow-hidden flex items-center"
       >
         <ImageTrail items={EXPERIENCE_IMAGES} variant={1} />
-
-        {/* Floating Instruction Badge */}
-        <div className="absolute bottom-8 right-6 md:right-16 z-20 pointer-events-none select-none">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-black/8 dark:border-white/8 bg-[#fafafa]/60 dark:bg-black/60 backdrop-blur-md transition-all duration-300">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span>
-            </span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-              Move cursor to reveal images
-            </span>
-          </div>
-        </div>
 
         <div className="w-full overflow-hidden relative z-10">
           <div

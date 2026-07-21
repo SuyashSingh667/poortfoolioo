@@ -1104,7 +1104,10 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
   const [hasClickedButton, setHasClickedButton] = useState(false);
 
   const handleButtonClick = () => {
-    setHasClickedButton(true);
+    if (!hasClickedButton) {
+      setHasClickedButton(true);
+      return;
+    }
     if (!activeItem?.link) return;
     if (activeItem.link.startsWith('http')) {
       window.open(activeItem.link, '_blank');
@@ -1178,7 +1181,7 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
 
           <p className={`face-description text-black dark:text-white transition-opacity ${isMoving ? 'inactive' : 'active'}`}> {activeItem.description}</p>
 
-          <div onClick={handleButtonClick} className={`action-button ${isMoving ? 'inactive' : 'active'} ${!hasClickedButton ? 'click-me-prompt' : ''}`}>
+          <div onClick={handleButtonClick} className={`action-button ${isMoving ? 'inactive' : 'active'}`}>
             {!hasClickedButton ? (
               <>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
