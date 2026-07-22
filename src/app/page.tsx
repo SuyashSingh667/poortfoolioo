@@ -676,7 +676,7 @@ export default function Home() {
         className="relative flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 lg:gap-24 px-6 md:px-16 lg:px-24 h-screen w-full overflow-hidden bg-[#fafafa] dark:bg-[#0a0a0a] border-b border-black/5 dark:border-white/5 transition-colors duration-500"
       >
         {/* Left Column: 3D Avatar Canvas */}
-        <div className="w-full md:w-[48%] h-[60vh] md:h-[88vh] relative flex items-center justify-center">
+        <div className="w-full md:w-[48%] h-[60vh] md:h-[88vh] relative flex items-center justify-center -translate-y-[5px]">
           <InteractiveAvatar3D autoRotate={false} wireframeMode={false} accentColor="#71717a" />
         </div>
 
