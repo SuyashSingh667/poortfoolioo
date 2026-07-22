@@ -270,7 +270,12 @@ export default function PaperBinSkillset({
 
   // Update gravity parameters dynamically
   useEffect(() => {
+    console.log("Physics Sandbox - Gravity Updated:", { gravityY, gravityX, hasEngine: !!engineRef.current });
     if (engineRef.current) {
+      if (engineRef.current.world && engineRef.current.world.gravity) {
+        engineRef.current.world.gravity.y = gravityY;
+        engineRef.current.world.gravity.x = gravityX;
+      }
       engineRef.current.gravity.y = gravityY;
       engineRef.current.gravity.x = gravityX;
     }
@@ -278,6 +283,7 @@ export default function PaperBinSkillset({
 
   // Update bounciness (restitution) dynamically
   useEffect(() => {
+    console.log("Physics Sandbox - Bounciness Updated:", { bounciness, hasEngine: !!engineRef.current });
     if (engineRef.current) {
       const world = engineRef.current.world;
       const bodies = Matter.Composite.allBodies(world).filter(b => !b.isStatic && b.label !== "bin");
@@ -289,6 +295,7 @@ export default function PaperBinSkillset({
 
   // Trigger explosion force dynamically
   useEffect(() => {
+    console.log("Physics Sandbox - Explode Triggered:", { explodeTrigger, hasEngine: !!engineRef.current });
     if (explodeTrigger > 0 && engineRef.current) {
       const world = engineRef.current.world;
       const bodies = Matter.Composite.allBodies(world).filter(b => !b.isStatic && b.label !== "bin");
@@ -305,6 +312,7 @@ export default function PaperBinSkillset({
 
   // Trigger vacuum suck-in force dynamically
   useEffect(() => {
+    console.log("Physics Sandbox - Vacuum Triggered:", { vacuumTrigger, hasEngine: !!engineRef.current });
     if (vacuumTrigger > 0 && engineRef.current) {
       const world = engineRef.current.world;
       const bodies = Matter.Composite.allBodies(world).filter(b => !b.isStatic && b.label !== "bin");
