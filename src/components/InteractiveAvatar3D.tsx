@@ -123,6 +123,32 @@ export default function InteractiveAvatar3D({
     const avatarGroup = new THREE.Group();
     scene.add(avatarGroup);
 
+    // Create soft contact shadow plane under the feet
+    const shadowCanvas = document.createElement("canvas");
+    shadowCanvas.width = 128;
+    shadowCanvas.height = 128;
+    const shadowCtx = shadowCanvas.getContext("2d");
+    if (shadowCtx) {
+      const gradient = shadowCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gradient.addColorStop(0, "rgba(0, 0, 0, 0.6)");
+      gradient.addColorStop(0.2, "rgba(0, 0, 0, 0.45)");
+      gradient.addColorStop(0.5, "rgba(0, 0, 0, 0.15)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+      shadowCtx.fillStyle = gradient;
+      shadowCtx.fillRect(0, 0, 128, 128);
+    }
+    const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
+    const shadowGeo = new THREE.PlaneGeometry(1.6, 1.2);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTexture,
+      transparent: true,
+      depthWrite: false,
+    });
+    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.set(0, -1.35, 0.05);
+    scene.add(shadowPlane);
+
     // Load the GLTF/GLB Model
     const loader = new GLTFLoader();
     let headObject: THREE.Object3D | null = null;
@@ -374,6 +400,7 @@ export default function InteractiveAvatar3D({
       }
 
       // Traverse scene to dynamically dispose geometries and materials
+      shadowTexture.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           if (object.geometry) object.geometry.dispose();
