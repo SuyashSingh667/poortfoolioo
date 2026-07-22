@@ -191,15 +191,15 @@ const RadarChart = ({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const axes = [
-    { key: "Creative/3D", label: "Creative/3D", value: 94, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -12 },
-    { key: "Frontend", label: "Frontend", value: 76, angle: 0, xAlign: "start", yAlign: "middle", dx: 12 },
-    { key: "Architecture", label: "Architecture", value: 58, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 14 },
-    { key: "Motion", label: "Motion", value: 85, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -12 },
+    { key: "Creative/3D", label: "Creative/3D", value: 96, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -14 },
+    { key: "Frontend", label: "Frontend", value: 64, angle: 0, xAlign: "start", yAlign: "middle", dx: 16 },
+    { key: "Architecture", label: "Architecture", value: 48, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 16 },
+    { key: "Motion", label: "Motion", value: 88, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -16 },
   ];
 
-  const cx = 175;
-  const cy = 175;
-  const r = 125;
+  const cx = 210;
+  const cy = 210;
+  const r = 150;
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
 
@@ -217,7 +217,7 @@ const RadarChart = ({
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 select-none">
-      <svg width="350" height="350" className="overflow-visible">
+      <svg width="420" height="420" className="overflow-visible">
         {/* Grid outline lines */}
         {gridLevels.map((level, i) => (
           <polygon
@@ -229,7 +229,7 @@ const RadarChart = ({
               return `${x},${y}`;
             }).join(" ")}
             fill="none"
-            className="stroke-black/[0.05] dark:stroke-white/[0.05]"
+            className="stroke-black/[0.06] dark:stroke-white/[0.06]"
             strokeWidth="1"
           />
         ))}
@@ -242,8 +242,8 @@ const RadarChart = ({
             cy={cy}
             r={r * level}
             fill="none"
-            className="stroke-black/[0.02] dark:stroke-white/[0.02] stroke-dasharray-[2_4]"
-            strokeWidth="1"
+            className="stroke-black/[0.03] dark:stroke-white/[0.03] stroke-dasharray-[2_4]"
+            strokeWidth="1.2"
           />
         ))}
 
@@ -255,7 +255,7 @@ const RadarChart = ({
             y1={cy}
             x2={cx + r * Math.cos(axis.angle)}
             y2={cy + r * Math.sin(axis.angle)}
-            className="stroke-black/[0.08] dark:stroke-white/[0.08]"
+            className="stroke-black/[0.09] dark:stroke-white/[0.09]"
             strokeWidth="1.2"
           />
         ))}
@@ -265,9 +265,9 @@ const RadarChart = ({
           points={points}
           fill="rgba(113, 113, 122, 0.12)"
           className="stroke-[#171717] dark:stroke-white transition-all duration-300"
-          strokeWidth="2.2"
+          strokeWidth="2.5"
           style={{
-            filter: activeCategory ? "drop-shadow(0 0 10px rgba(113, 113, 122, 0.35))" : "none"
+            filter: activeCategory ? "drop-shadow(0 0 12px rgba(113, 113, 122, 0.4))" : "none"
           }}
         />
 
@@ -287,7 +287,7 @@ const RadarChart = ({
               <circle
                 cx={x}
                 cy={y}
-                r="6"
+                r="6.5"
                 className="fill-[#171717] dark:fill-white transition-all duration-300"
                 style={{
                   transform: isActive ? "scale(1.5)" : "scale(1)",
@@ -297,7 +297,7 @@ const RadarChart = ({
               <circle
                 cx={x}
                 cy={y}
-                r="16"
+                r="18"
                 fill="transparent"
               />
             </g>
@@ -306,7 +306,7 @@ const RadarChart = ({
 
         {/* Labels */}
         {axes.map((axis, i) => {
-          const labelR = r + 18;
+          const labelR = r + 20;
           const x = cx + labelR * Math.cos(axis.angle) + (axis.dx || 0);
           const y = cy + labelR * Math.sin(axis.angle) + (axis.dy || 0);
           const isActive = activeCategory === axis.key;
@@ -319,10 +319,10 @@ const RadarChart = ({
               dominantBaseline={axis.yAlign as any}
               onMouseEnter={() => handleHover(axis.key)}
               onMouseLeave={() => handleHover(null)}
-              className={`font-mono text-[10px] uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
+              className={`font-mono text-[11px] md:text-[12px] font-bold uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
                 isActive 
-                  ? "text-[#171717] dark:text-white font-bold" 
-                  : "text-zinc-400 dark:text-zinc-500"
+                  ? "text-[#171717] dark:text-white" 
+                  : "text-zinc-500 dark:text-zinc-400"
               }`}
             >
               {axis.label}
@@ -330,7 +330,7 @@ const RadarChart = ({
           );
         })}
       </svg>
-      <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-650 max-w-[200px] text-center leading-relaxed h-[24px]">
+      <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-zinc-500 dark:text-zinc-400 max-w-[240px] text-center leading-relaxed h-[24px]">
         {activeCategory ? (
           <span>Focus: <strong className="text-[#171717] dark:text-white">{activeCategory}</strong> highlighted.</span>
         ) : (
@@ -783,7 +783,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-60px" }}
             className="w-full md:w-[36%] shrink-0"
           >
-            <div style={{ perspective: "1000px" }} className="w-full relative h-[540px]">
+            <div style={{ perspective: "1000px" }} className="w-full relative h-[600px]">
               <div
                 style={{
                   transformStyle: "preserve-3d",
