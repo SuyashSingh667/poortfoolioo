@@ -149,11 +149,11 @@ export default function InteractiveAvatar3D({
         modelWrap.add(model);
 
         // Scale the model wrap to fit nicely with good proportions
-        const scale = 3.4 / size.y;
+        const scale = 3.0 / size.y;
         modelWrap.scale.setScalar(scale);
 
         // Adjust Y position so the entire head and body fit comfortably within the camera frame
-        modelWrap.position.y = -0.38;
+        modelWrap.position.y = -0.45;
 
         avatarGroup.add(modelWrap);
 
