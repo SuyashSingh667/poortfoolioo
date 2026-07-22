@@ -109,8 +109,8 @@ export default function InteractiveAvatar3D({
     mainLight.position.set(5, 5, 4);
     scene.add(mainLight);
 
-    // Cheap, performant neon HemisphereLight (Sky: Cyber Blue, Ground: Orange)
-    const hemiLight = new THREE.HemisphereLight(0x06b6d4, 0xf97316, 1.5);
+    // Clean studio HemisphereLight (Sky: White, Ground: Charcoal)
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.8);
     scene.add(hemiLight);
 
     // Single active dynamic point light for specular neon glow
