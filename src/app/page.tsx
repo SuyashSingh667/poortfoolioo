@@ -190,6 +190,14 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const cardsContainerRef = useRef<HTMLDivElement>(null);
 
+  // Physics Sandbox Panel States
+  const [gravityY, setGravityY] = useState(3.0);
+  const [gravityX, setGravityX] = useState(0.0);
+  const [bounciness, setBounciness] = useState(0.32);
+  const [explodeTrigger, setExplodeTrigger] = useState(0);
+  const [vacuumTrigger, setVacuumTrigger] = useState(0);
+  const [resetKey, setResetKey] = useState(0);
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
@@ -598,62 +606,109 @@ export default function Home() {
         <div className="absolute top-1/3 left-[5%] w-[400px] h-[400px] bg-zinc-500/8 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row gap-10 items-center relative z-10">
-          {/* Left: Text & Stats */}
+          {/* Left: Physics Control Panel */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[36%] space-y-8 shrink-0"
+            className="w-full md:w-[36%] space-y-7 shrink-0"
           >
             <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 font-bold">
-              // interactive sandbox
+              // physics sandbox
             </div>
 
-            {/* Bold headline */}
             <div>
               <h3
                 className="font-black uppercase tracking-tighter leading-[0.88] text-[#171717] dark:text-white"
-                style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)" }}
+                style={{ fontSize: "clamp(2.5rem, 5vw, 3.8rem)" }}
               >
-                Built<br />
-                <span className="text-zinc-400 dark:text-zinc-650">Different.</span>
+                Physics<br />
+                <span className="text-zinc-400 dark:text-zinc-650">Controls.</span>
               </h3>
             </div>
 
-            {/* Tagline */}
-            <p className="text-[14px] text-zinc-500 dark:text-zinc-400 leading-[1.7] max-w-[290px]">
-              Not just buzzwords on a résumé — <span className="text-[#171717] dark:text-white font-medium">battle-tested tools</span> I ship with daily. Fling or grab the paper nodes to interact with my skillset.
-            </p>
+            {/* Sliders container */}
+            <div className="space-y-5 pt-1">
+              {/* Gravity Y Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  <span>Gravity (Y-Axis)</span>
+                  <span className="font-bold text-[#171717] dark:text-white">{gravityY.toFixed(1)}g</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.0"
+                  max="8.0"
+                  step="0.2"
+                  value={gravityY}
+                  onChange={(e) => setGravityY(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
+                />
+              </div>
 
-            {/* Stats grid */}
-            <div className="grid grid-cols-3 gap-4 pt-2">
-              {[
-                { value: "16+", label: "Skills" },
-                { value: "3+", label: "Projects" },
-                { value: "2+", label: "Years" },
-              ].map((stat) => (
-                <div key={stat.label} className="text-left border-l border-black/8 dark:border-white/8 pl-3">
-                  <span className="block font-black text-2xl md:text-3xl tracking-tight text-[#171717] dark:text-white leading-none">
-                    {stat.value}
-                  </span>
-                  <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 mt-1.5">
-                    {stat.label}
+              {/* Gravity X (Wind) Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  <span>Wind Force (X-Axis)</span>
+                  <span className="font-bold text-[#171717] dark:text-white">
+                    {gravityX === 0 ? "None" : `${gravityX > 0 ? "→ " : "← "}${Math.abs(gravityX).toFixed(1)}`}
                   </span>
                 </div>
-              ))}
+                <input
+                  type="range"
+                  min="-4.0"
+                  max="4.0"
+                  step="0.2"
+                  value={gravityX}
+                  onChange={(e) => setGravityX(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
+                />
+              </div>
+
+              {/* Bounciness Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between font-mono text-[9px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  <span>Bounciness</span>
+                  <span className="font-bold text-[#171717] dark:text-white">{Math.round(bounciness * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.10"
+                  max="0.90"
+                  step="0.05"
+                  value={bounciness}
+                  onChange={(e) => setBounciness(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
+                />
+              </div>
             </div>
 
-            {/* Tech stack pills */}
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {["React", "Next.js", "Three.js", "WebGL", "TypeScript", "Tailwind", "GSAP"].map((t) => (
-                <span
-                  key={t}
-                  className="px-2.5 py-1 rounded-full border border-black/8 dark:border-white/8 bg-black/[0.03] dark:bg-white/[0.03] font-mono text-[8px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
+            {/* Quick Action Buttons */}
+            <div className="space-y-3 pt-2">
+              <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-650">
+                Trigger Actions
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setExplodeTrigger(prev => prev + 1)}
+                  className="px-4 py-2 border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] active:scale-95 transition-all text-[9px] font-mono uppercase tracking-widest text-[#171717] dark:text-white rounded-lg cursor-pointer font-bold"
                 >
-                  {t}
-                </span>
-              ))}
+                  💥 Explode
+                </button>
+                <button
+                  onClick={() => setVacuumTrigger(prev => prev + 1)}
+                  className="px-4 py-2 border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] active:scale-95 transition-all text-[9px] font-mono uppercase tracking-widest text-[#171717] dark:text-white rounded-lg cursor-pointer font-bold"
+                >
+                  🧹 Vacuum
+                </button>
+              </div>
+              <button
+                onClick={() => setResetKey(prev => prev + 1)}
+                className="w-full py-2.5 bg-[#171717] dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-[0.98] transition-all text-[9px] font-mono uppercase tracking-widest rounded-lg cursor-pointer font-bold"
+              >
+                🔄 Reset Arena
+              </button>
             </div>
           </motion.div>
 
@@ -665,7 +720,15 @@ export default function Home() {
             viewport={{ once: true, margin: "-60px" }}
             className="w-full md:w-[64%] h-[65vh] md:h-[72vh] relative"
           >
-            <PaperBinSkillset theme={resolvedTheme} />
+            <PaperBinSkillset 
+              theme={resolvedTheme} 
+              gravityY={gravityY}
+              gravityX={gravityX}
+              bounciness={bounciness}
+              explodeTrigger={explodeTrigger}
+              vacuumTrigger={vacuumTrigger}
+              resetKey={resetKey}
+            />
           </motion.div>
         </div>
       </section>

@@ -238,10 +238,20 @@ export default function PaperBinSkillset({
   theme,
   onCountChange,
   resetKey,
+  gravityY = 3.0,
+  gravityX = 0.0,
+  bounciness = 0.32,
+  explodeTrigger = 0,
+  vacuumTrigger = 0,
 }: {
   theme?: string;
   onCountChange?: (insideCount: number) => void;
   resetKey?: number;
+  gravityY?: number;
+  gravityX?: number;
+  bounciness?: number;
+  explodeTrigger?: number;
+  vacuumTrigger?: number;
 }) {
   const outerRef    = useRef<HTMLDivElement>(null);
   const physRef     = useRef<HTMLDivElement>(null);
@@ -257,6 +267,64 @@ export default function PaperBinSkillset({
   useEffect(() => {
     onCountChangeRef.current = onCountChange;
   }, [onCountChange]);
+
+  // Update gravity parameters dynamically
+  useEffect(() => {
+    if (engineRef.current) {
+      engineRef.current.gravity.y = gravityY;
+      engineRef.current.gravity.x = gravityX;
+    }
+  }, [gravityY, gravityX]);
+
+  // Update bounciness (restitution) dynamically
+  useEffect(() => {
+    if (engineRef.current) {
+      const world = engineRef.current.world;
+      const bodies = Matter.Composite.allBodies(world).filter(b => !b.isStatic && b.label !== "bin");
+      bodies.forEach(b => {
+        b.restitution = bounciness;
+      });
+    }
+  }, [bounciness]);
+
+  // Trigger explosion force dynamically
+  useEffect(() => {
+    if (explodeTrigger > 0 && engineRef.current) {
+      const world = engineRef.current.world;
+      const bodies = Matter.Composite.allBodies(world).filter(b => !b.isStatic && b.label !== "bin");
+      bodies.forEach(b => {
+        const forceMagnitude = 0.038 * b.mass;
+        const angle = Math.random() * Math.PI * 2;
+        Matter.Body.applyForce(b, b.position, {
+          x: Math.cos(angle) * forceMagnitude * 1.5,
+          y: -Math.abs(Math.sin(angle)) * forceMagnitude * 2.2 - 0.015 * b.mass,
+        });
+      });
+    }
+  }, [explodeTrigger]);
+
+  // Trigger vacuum suck-in force dynamically
+  useEffect(() => {
+    if (vacuumTrigger > 0 && engineRef.current) {
+      const world = engineRef.current.world;
+      const bodies = Matter.Composite.allBodies(world).filter(b => !b.isStatic && b.label !== "bin");
+      const px = pxRef.current;
+      const binX = px ? px.cx : 150;
+      const binY = px ? px.botYCenter : 300;
+      
+      bodies.forEach(b => {
+        const dx = binX - b.position.x;
+        const dy = binY - b.position.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const forceMagnitude = 0.012 * b.mass;
+        
+        Matter.Body.applyForce(b, b.position, {
+          x: (dx / dist) * forceMagnitude,
+          y: (dy / dist) * forceMagnitude - 0.004 * b.mass,
+        });
+      });
+    }
+  }, [vacuumTrigger]);
 
   useEffect(() => {
     const outer = outerRef.current;
@@ -330,7 +398,7 @@ export default function PaperBinSkillset({
 
     const engine = M.Engine.create({
       enableSleeping: false, // keep gravity active on all bodies at all times
-      gravity: { x:0, y:3.0 },
+      gravity: { x: gravityX, y: gravityY },
       positionIterations: 10,
       velocityIterations: 8,
     } as any);
@@ -400,7 +468,7 @@ export default function PaperBinSkillset({
     // ── Spawn balls above the bin (zero overlap, falls in naturally) ───────
     // This prevents overlapping spawning forces from exploding the balls
     // through the bottom mesh boundaries on page load.
-    const bOpts = { friction:.80, frictionAir:.028, restitution:.32, density:.0018, inertia: Infinity };
+    const bOpts = { friction:.80, frictionAir:.028, restitution: bounciness, density:.0018, inertia: Infinity };
     const bodies: Matter.Body[] = [];
     const cols = 3;
     const hSp  = 76; // horizontal spacing (no overlap since 76 > 72)
