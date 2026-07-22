@@ -243,6 +243,7 @@ export default function PaperBinSkillset({
   bounciness = 0.32,
   explodeTrigger = 0,
   vacuumTrigger = 0,
+  highlightedSkills = [],
 }: {
   theme?: string;
   onCountChange?: (insideCount: number) => void;
@@ -252,12 +253,18 @@ export default function PaperBinSkillset({
   bounciness?: number;
   explodeTrigger?: number;
   vacuumTrigger?: number;
+  highlightedSkills?: string[];
 }) {
   const outerRef    = useRef<HTMLDivElement>(null);
   const physRef     = useRef<HTMLDivElement>(null);
   const backCanvasR = useRef<HTMLCanvasElement>(null);
   const frontCanvasR= useRef<HTMLCanvasElement>(null);
   const engineRef   = useRef<Matter.Engine | null>(null);
+
+  const highlightedSkillsRef = useRef(highlightedSkills);
+  useEffect(() => {
+    highlightedSkillsRef.current = highlightedSkills;
+  }, [highlightedSkills]);
   const rafRef      = useRef(0);
   const elRefs      = useRef<(HTMLDivElement | null)[]>([]);
   const pxRef       = useRef<BinPx | null>(null);
@@ -610,6 +617,9 @@ export default function PaperBinSkillset({
       clampPositions();
 
       let insideCount = 0;
+      const activeHighlights = highlightedSkillsRef.current;
+      const hasHighlights = activeHighlights && activeHighlights.length > 0;
+
       for (let i = 0; i < bodies.length; i++) {
         if (bodies[i].plugin.isInsideBin) {
           insideCount++;
@@ -620,7 +630,33 @@ export default function PaperBinSkillset({
         div.style.visibility = "visible";
         div.style.left = `${position.x}px`;
         div.style.top = `${position.y}px`;
-        div.style.transform = `translate(-50%,-50%) rotate(${angle}rad)`;
+
+        // Apply highlights based on category hover
+        const label = SKILL_ITEMS[i];
+        const isHighlighted = hasHighlights && activeHighlights.includes(label);
+
+        if (hasHighlights) {
+          if (isHighlighted) {
+            // Glowing, scale up, highlight on top
+            div.style.filter = dark 
+              ? "brightness(1.15) drop-shadow(0 0 10px rgba(255,255,255,0.4))" 
+              : "brightness(1.05) drop-shadow(0 0 10px rgba(0,0,0,0.18))";
+            div.style.transform = `translate(-50%,-50%) rotate(${angle}rad) scale(1.22)`;
+            div.style.zIndex = "25";
+          } else {
+            // Fade, scale down, drop to background
+            div.style.filter = dark 
+              ? "brightness(0.35) grayscale(60%) opacity(0.4)" 
+              : "brightness(0.85) grayscale(60%) opacity(0.3)";
+            div.style.transform = `translate(-50%,-50%) rotate(${angle}rad) scale(0.88)`;
+            div.style.zIndex = "5";
+          }
+        } else {
+          // Standard styling
+          div.style.filter = dark ? "brightness(.82)" : "none";
+          div.style.transform = `translate(-50%,-50%) rotate(${angle}rad) scale(1)`;
+          div.style.zIndex = "10";
+        }
       }
       if (onCountChangeRef.current) {
         onCountChangeRef.current(insideCount);

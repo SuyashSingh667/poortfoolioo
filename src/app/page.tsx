@@ -183,6 +183,164 @@ function Chapter({ num, eyebrow, title }: { num: string; eyebrow: string; title:
   );
 }
 
+const RadarChart = ({ 
+  onHoverCategory 
+}: { 
+  onHoverCategory: (cat: string | null) => void 
+}) => {
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  const axes = [
+    { key: "Creative/3D", label: "Creative/3D", value: 90, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -8 },
+    { key: "Frontend", label: "Frontend", value: 95, angle: 0, xAlign: "start", yAlign: "middle", dx: 8 },
+    { key: "Architecture", label: "Architecture", value: 85, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 10 },
+    { key: "Motion", label: "Motion", value: 90, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -8 },
+  ];
+
+  const cx = 110;
+  const cy = 110;
+  const r = 70;
+
+  const gridLevels = [0.25, 0.5, 0.75, 1];
+
+  const points = axes.map(axis => {
+    const valR = r * (axis.value / 100);
+    const x = cx + valR * Math.cos(axis.angle);
+    const y = cy + valR * Math.sin(axis.angle);
+    return `${x},${y}`;
+  }).join(" ");
+
+  const handleHover = (cat: string | null) => {
+    setActiveCategory(cat);
+    onHoverCategory(cat);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center space-y-4 select-none">
+      <svg width="220" height="220" className="overflow-visible">
+        {/* Grid outline lines */}
+        {gridLevels.map((level, i) => (
+          <polygon
+            key={i}
+            points={axes.map(axis => {
+              const gr = r * level;
+              const x = cx + gr * Math.cos(axis.angle);
+              const y = cy + gr * Math.sin(axis.angle);
+              return `${x},${y}`;
+            }).join(" ")}
+            fill="none"
+            className="stroke-black/[0.06] dark:stroke-white/[0.06]"
+            strokeWidth="1"
+          />
+        ))}
+
+        {/* Concentric circles overlay */}
+        {gridLevels.map((level, i) => (
+          <circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={r * level}
+            fill="none"
+            className="stroke-black/[0.03] dark:stroke-white/[0.03] stroke-dasharray-[2_4]"
+            strokeWidth="1"
+          />
+        ))}
+
+        {/* Axis lines */}
+        {axes.map((axis, i) => (
+          <line
+            key={i}
+            x1={cx}
+            y1={cy}
+            x2={cx + r * Math.cos(axis.angle)}
+            y2={cy + r * Math.sin(axis.angle)}
+            className="stroke-black/10 dark:stroke-white/10"
+            strokeWidth="1.2"
+          />
+        ))}
+
+        {/* Filled Expertise Shape */}
+        <polygon
+          points={points}
+          fill="rgba(113, 113, 122, 0.12)"
+          className="stroke-[#171717] dark:stroke-white transition-all duration-300"
+          strokeWidth="2.2"
+          style={{
+            filter: activeCategory ? "drop-shadow(0 0 8px rgba(113, 113, 122, 0.3))" : "none"
+          }}
+        />
+
+        {/* Outer points (interactive targets) */}
+        {axes.map((axis, i) => {
+          const valR = r * (axis.value / 100);
+          const x = cx + valR * Math.cos(axis.angle);
+          const y = cy + valR * Math.sin(axis.angle);
+          const isActive = activeCategory === axis.key;
+          return (
+            <g 
+              key={i}
+              onMouseEnter={() => handleHover(axis.key)}
+              onMouseLeave={() => handleHover(null)}
+              className="cursor-pointer"
+            >
+              <circle
+                cx={x}
+                cy={y}
+                r="5"
+                className="fill-[#171717] dark:fill-white transition-all duration-300"
+                style={{
+                  transform: isActive ? "scale(1.5)" : "scale(1)",
+                  transformOrigin: `${x}px ${y}px`
+                }}
+              />
+              <circle
+                cx={x}
+                cy={y}
+                r="12"
+                fill="transparent"
+              />
+            </g>
+          );
+        })}
+
+        {/* Labels */}
+        {axes.map((axis, i) => {
+          const labelR = r + 15;
+          const x = cx + labelR * Math.cos(axis.angle) + (axis.dx || 0);
+          const y = cy + labelR * Math.sin(axis.angle) + (axis.dy || 0);
+          const isActive = activeCategory === axis.key;
+          return (
+            <text
+              key={i}
+              x={x}
+              y={y}
+              textAnchor={axis.xAlign as any}
+              dominantBaseline={axis.yAlign as any}
+              onMouseEnter={() => handleHover(axis.key)}
+              onMouseLeave={() => handleHover(null)}
+              className={`font-mono text-[9px] uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
+                isActive 
+                  ? "text-[#171717] dark:text-white font-bold" 
+                  : "text-zinc-400 dark:text-zinc-500"
+              }`}
+            >
+              {axis.label}
+            </text>
+          );
+        })}
+      </svg>
+      <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-650 max-w-[200px] text-center leading-relaxed h-[24px]">
+        {activeCategory ? (
+          <span>Focus: <strong className="text-[#171717] dark:text-white">{activeCategory}</strong> highlighted.</span>
+        ) : (
+          <span>Hover categories to filter skillset.</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   const { resolvedTheme } = useTheme();
@@ -196,6 +354,9 @@ export default function Home() {
   const [bounciness, setBounciness] = useState(0.32);
   const [explodeTrigger, setExplodeTrigger] = useState(0);
   const [vacuumTrigger, setVacuumTrigger] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
 
   const { scrollYProgress } = useScroll();
@@ -397,6 +558,14 @@ export default function Home() {
   const menuItems = projects.map((p) => ({
     image: p.image, link: p.link, title: p.title, description: p.description,
   }));
+
+  const CATEGORIES: Record<string, string[]> = {
+    "Creative/3D": ["WebGL", "Three.js", "Shaders"],
+    "Frontend": ["React", "Next.js", "Tailwind", "Figma", "UI/UX"],
+    "Architecture": ["TypeScript", "Node.js"],
+    "Motion": ["GSAP", "Framer"]
+  };
+  const highlightedSkills = hoveredCategory ? CATEGORIES[hoveredCategory] || [] : [];
 
   return (
     <main className="min-h-screen w-full bg-[#fafafa] text-[#171717] transition-colors duration-500 dark:bg-[#0a0a0a] dark:text-[#ededed] overflow-x-hidden">
@@ -606,109 +775,207 @@ export default function Home() {
         <div className="absolute top-1/3 left-[5%] w-[400px] h-[400px] bg-zinc-500/8 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row gap-10 items-center relative z-10">
-          {/* Left: Physics Control Panel */}
+          {/* Left Panel: 3D Flip Card Container */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[36%] space-y-7 shrink-0"
+            className="w-full md:w-[36%] shrink-0"
           >
-            <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 font-bold">
-              // physics sandbox
-            </div>
-
-            <div>
-              <h3
-                className="font-black uppercase tracking-tighter leading-[0.88] text-[#171717] dark:text-white"
-                style={{ fontSize: "clamp(2.5rem, 5vw, 3.8rem)" }}
+            <div style={{ perspective: "1000px" }} className="w-full relative h-[440px]">
+              <div
+                style={{
+                  transformStyle: "preserve-3d",
+                  transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+                  transform: showSettings ? "rotateY(180deg)" : "rotateY(0deg)",
+                }}
+                className="w-full h-full relative"
               >
-                Physics<br />
-                <span className="text-zinc-400 dark:text-zinc-650">Controls.</span>
-              </h3>
-            </div>
-
-            {/* Sliders container */}
-            <div className="space-y-5 pt-1">
-              {/* Gravity Y Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between font-mono text-[9px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                  <span>Gravity (Y-Axis)</span>
-                  <span className="font-bold text-[#171717] dark:text-white">{gravityY.toFixed(1)}g</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.0"
-                  max="8.0"
-                  step="0.2"
-                  value={gravityY}
-                  onChange={(e) => setGravityY(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
-                />
-              </div>
-
-              {/* Gravity X (Wind) Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between font-mono text-[9px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                  <span>Wind Force (X-Axis)</span>
-                  <span className="font-bold text-[#171717] dark:text-white">
-                    {gravityX === 0 ? "None" : `${gravityX > 0 ? "→ " : "← "}${Math.abs(gravityX).toFixed(1)}`}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="-4.0"
-                  max="4.0"
-                  step="0.2"
-                  value={gravityX}
-                  onChange={(e) => setGravityX(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
-                />
-              </div>
-
-              {/* Bounciness Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between font-mono text-[9px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                  <span>Bounciness</span>
-                  <span className="font-bold text-[#171717] dark:text-white">{Math.round(bounciness * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.10"
-                  max="0.90"
-                  step="0.05"
-                  value={bounciness}
-                  onChange={(e) => setBounciness(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
-                />
-              </div>
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div className="space-y-3 pt-2">
-              <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-650">
-                Trigger Actions
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setExplodeTrigger(prev => prev + 1)}
-                  className="px-4 py-2 border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] active:scale-95 transition-all text-[9px] font-mono uppercase tracking-widest text-[#171717] dark:text-white rounded-lg cursor-pointer font-bold"
+                {/* Front Side: Radar Chart */}
+                <div
+                  style={{
+                    backfaceVisibility: "hidden",
+                  }}
+                  className="absolute inset-0 w-full h-full bg-black/[0.015] dark:bg-white/[0.015] border border-black/5 dark:border-white/5 rounded-2xl p-6 flex flex-col justify-between"
                 >
-                  💥 Explode
-                </button>
-                <button
-                  onClick={() => setVacuumTrigger(prev => prev + 1)}
-                  className="px-4 py-2 border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] active:scale-95 transition-all text-[9px] font-mono uppercase tracking-widest text-[#171717] dark:text-white rounded-lg cursor-pointer font-bold"
+                  <div className="flex justify-between items-start w-full relative">
+                    <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 font-bold">
+                      // skillset analysis
+                    </div>
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors text-zinc-500 hover:text-[#171717] dark:hover:text-white cursor-pointer"
+                        title="Options"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                      </button>
+                      
+                      {showDropdown && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+                          <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-[#1a1a1a] border border-black/8 dark:border-white/8 rounded-lg shadow-lg py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                            <button
+                              onClick={() => {
+                                setShowSettings(true);
+                                setShowDropdown(false);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-[10px] font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-300 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] flex items-center gap-2 cursor-pointer font-bold"
+                            >
+                              ⚙️ Configure
+                            </button>
+                            <button
+                              onClick={() => {
+                                setExplodeTrigger(prev => prev + 1);
+                                setShowDropdown(false);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-[10px] font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-300 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] flex items-center gap-2 cursor-pointer font-bold"
+                            >
+                              💥 Explode
+                            </button>
+                            <button
+                              onClick={() => {
+                                setResetKey(prev => prev + 1);
+                                setShowDropdown(false);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-[10px] font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-300 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] flex items-center gap-2 cursor-pointer font-bold"
+                            >
+                              🔄 Respawn
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3
+                      className="font-black uppercase tracking-tighter leading-[0.88] text-[#171717] dark:text-white"
+                      style={{ fontSize: "clamp(2.3rem, 4.5vw, 3.2rem)" }}
+                    >
+                      Skill<br />
+                      <span className="text-zinc-400 dark:text-zinc-650">Radar.</span>
+                    </h3>
+                  </div>
+
+                  <div className="py-2 flex justify-center items-center">
+                    <RadarChart onHoverCategory={setHoveredCategory} />
+                  </div>
+                </div>
+
+                {/* Back Side: Physics Controls */}
+                <div
+                  style={{
+                    backfaceVisibility: "hidden",
+                    transform: "rotateY(180deg)",
+                  }}
+                  className="absolute inset-0 w-full h-full bg-black/[0.015] dark:bg-white/[0.015] border border-black/5 dark:border-white/5 rounded-2xl p-6 flex flex-col justify-between"
                 >
-                  🧹 Vacuum
-                </button>
+                  <div className="flex justify-between items-start w-full relative">
+                    <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 font-bold">
+                      // sandbox configuration
+                    </div>
+                    <button
+                      onClick={() => setShowSettings(false)}
+                      className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors text-zinc-500 hover:text-[#171717] dark:hover:text-white cursor-pointer"
+                      title="Back to Radar Chart"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    </button>
+                  </div>
+
+                  <div>
+                    <h3
+                      className="font-black uppercase tracking-tighter leading-[0.88] text-[#171717] dark:text-white"
+                      style={{ fontSize: "clamp(2.3rem, 4.5vw, 3.2rem)" }}
+                    >
+                      Sandbox<br />
+                      <span className="text-zinc-400 dark:text-zinc-650">Settings.</span>
+                    </h3>
+                  </div>
+
+                  {/* Sliders container */}
+                  <div className="space-y-4 pt-1">
+                    {/* Gravity Y Slider */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between font-mono text-[8px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                        <span>Gravity (Y-Axis)</span>
+                        <span className="font-bold text-[#171717] dark:text-white">{gravityY.toFixed(1)}g</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.0"
+                        max="8.0"
+                        step="0.2"
+                        value={gravityY}
+                        onChange={(e) => setGravityY(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
+                      />
+                    </div>
+
+                    {/* Gravity X (Wind) Slider */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between font-mono text-[8px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                        <span>Wind Force (X-Axis)</span>
+                        <span className="font-bold text-[#171717] dark:text-white">
+                          {gravityX === 0 ? "None" : `${gravityX > 0 ? "→ " : "← "}${Math.abs(gravityX).toFixed(1)}`}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-4.0"
+                        max="4.0"
+                        step="0.2"
+                        value={gravityX}
+                        onChange={(e) => setGravityX(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
+                      />
+                    </div>
+
+                    {/* Bounciness Slider */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between font-mono text-[8px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                        <span>Bounciness</span>
+                        <span className="font-bold text-[#171717] dark:text-white">{Math.round(bounciness * 100)}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.10"
+                        max="0.90"
+                        step="0.05"
+                        value={bounciness}
+                        onChange={(e) => setBounciness(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-black/8 dark:bg-white/8 rounded-lg appearance-none cursor-pointer accent-[#171717] dark:accent-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quick Action Buttons */}
+                  <div className="space-y-2 pt-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setExplodeTrigger(prev => prev + 1)}
+                        className="px-3 py-1.5 border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] active:scale-95 transition-all text-[8px] font-mono uppercase tracking-widest text-[#171717] dark:text-white rounded-lg cursor-pointer font-bold"
+                      >
+                        💥 Explode
+                      </button>
+                      <button
+                        onClick={() => setVacuumTrigger(prev => prev + 1)}
+                        className="px-3 py-1.5 border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] active:scale-95 transition-all text-[8px] font-mono uppercase tracking-widest text-[#171717] dark:text-white rounded-lg cursor-pointer font-bold"
+                      >
+                        🧹 Vacuum
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setResetKey(prev => prev + 1)}
+                      className="w-full py-2 bg-[#171717] dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-[0.98] transition-all text-[8px] font-mono uppercase tracking-widest rounded-lg cursor-pointer font-bold"
+                    >
+                      🔄 Reset Arena
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button
-                onClick={() => setResetKey(prev => prev + 1)}
-                className="w-full py-2.5 bg-[#171717] dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-[0.98] transition-all text-[9px] font-mono uppercase tracking-widest rounded-lg cursor-pointer font-bold"
-              >
-                🔄 Reset Arena
-              </button>
             </div>
           </motion.div>
 
@@ -728,6 +995,7 @@ export default function Home() {
               explodeTrigger={explodeTrigger}
               vacuumTrigger={vacuumTrigger}
               resetKey={resetKey}
+              highlightedSkills={highlightedSkills}
             />
           </motion.div>
         </div>
