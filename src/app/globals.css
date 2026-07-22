@@ -144,6 +144,21 @@
   animation: float 6s ease-in-out infinite;
 }
 
+@keyframes spotlight {
+  0% {
+    opacity: 0;
+    transform: translate(-3%, -18%) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(3%, 7%) scale(1);
+  }
+}
+
+.animate-spotlight {
+  animation: spotlight 2s ease .75s 1 forwards;
+}
+
 .animate-float-medium {
   animation: float 4s ease-in-out infinite;
 }

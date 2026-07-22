@@ -11,6 +11,7 @@ import GlitterWrap from "@/components/GlitterWrap";
 import TextPressure from "@/components/TextPressure";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { MusicToggleButton } from "@/components/MusicToggle";
+import { Spotlight } from "@/components/ui/spotlight";
 import PaperBinSkillset from "@/components/PaperBinSkillset";
 import MeshText from "@/components/MeshText";
 import InteractiveAvatar3D from "@/components/InteractiveAvatar3D";
@@ -678,6 +679,14 @@ export default function Home() {
         id="about"
         className="relative flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 lg:gap-24 px-6 md:px-16 lg:px-24 h-screen w-full overflow-hidden bg-[#fafafa] dark:bg-[#0a0a0a] border-b border-black/5 dark:border-white/5 transition-colors duration-500"
       >
+        {/* Spotlight & Grid Background Overlay */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] [background-size:40px_40px] [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)]" />
+          <Spotlight
+            className="-top-40 left-0 md:-top-20 md:left-60"
+            fill="rgba(113, 113, 122, 0.25)"
+          />
+        </div>
         {/* Left Column: 3D Avatar Canvas */}
         <div className="w-full md:w-[48%] h-[60vh] md:h-[88vh] relative flex items-center justify-center pb-20 -translate-y-[10px]">
           <InteractiveAvatar3D autoRotate={false} wireframeMode={false} accentColor="#71717a" />
