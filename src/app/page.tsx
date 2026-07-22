@@ -562,7 +562,7 @@ export default function Home() {
   const CATEGORIES: Record<string, string[]> = {
     "Creative/3D": ["WebGL", "Three.js", "Shaders"],
     "Frontend": ["React", "Next.js", "Tailwind", "Figma", "UI/UX"],
-    "Architecture": ["TypeScript", "Node.js"],
+    "Architecture": ["TypeScript", "Node.js", "PostgreSQL", "GraphQL", "Docker", "Python", "Redis"],
     "Motion": ["GSAP", "Framer"]
   };
   const highlightedSkills = hoveredCategory ? CATEGORIES[hoveredCategory] || [] : [];
