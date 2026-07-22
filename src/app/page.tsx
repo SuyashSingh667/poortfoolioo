@@ -776,14 +776,14 @@ export default function Home() {
         {/* Warm glow */}
         <div className="absolute top-1/3 left-[5%] w-[400px] h-[400px] bg-zinc-500/8 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row gap-10 items-center relative z-10">
+        <div className="max-w-7xl mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row justify-between items-center gap-16 lg:gap-24 relative z-10">
           {/* Left Panel: 3D Flip Card Container */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[48%] shrink-0"
+            className="w-full md:w-[42%] shrink-0"
           >
             <div style={{ perspective: "1000px" }} className="w-full relative h-[650px]">
               <div
@@ -987,7 +987,7 @@ export default function Home() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[52%] h-[65vh] md:h-[72vh] relative"
+            className="w-full md:w-[48%] h-[65vh] md:h-[72vh] relative"
           >
             <PaperBinSkillset 
               theme={resolvedTheme} 
