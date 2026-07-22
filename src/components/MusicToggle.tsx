@@ -21,19 +21,15 @@ export const MusicToggleButton = () => {
     audio.loop = true;
     audioRef.current = audio;
 
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onEnd = () => setIsPlaying(false);
-
-    audio.addEventListener("play", onPlay);
-    audio.addEventListener("pause", onPause);
-    audio.addEventListener("ended", onEnd);
+    audio.addEventListener("error", () => {
+      if (audioRef.current) {
+        audioRef.current.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        audioRef.current.load();
+      }
+    });
 
     return () => {
       audio.pause();
-      audio.removeEventListener("play", onPlay);
-      audio.removeEventListener("pause", onPause);
-      audio.removeEventListener("ended", onEnd);
       audioRef.current = null;
     };
   }, []);
@@ -53,9 +49,18 @@ export const MusicToggleButton = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     } else {
+      setIsPlaying(true);
       audioRef.current.play().catch((err) => {
-        console.warn("Audio play was prevented by browser autoplay policy:", err);
+        console.warn("Audio play failed or was blocked, trying fallback silent WAV:", err);
+        if (audioRef.current) {
+          audioRef.current.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+          audioRef.current.load();
+          audioRef.current.play().catch(() => {
+            setIsPlaying(false);
+          });
+        }
       });
     }
   };
