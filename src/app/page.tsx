@@ -198,9 +198,9 @@ const RadarChart = ({
     { key: "Motion", label: "Motion", value: 80, angle: -Math.PI / 2 + (8 * Math.PI / 5), xAlign: "end", yAlign: "middle", dx: -18, dy: -6 },
   ];
 
-  const cx = 250;
-  const cy = 250;
-  const r = 180;
+  const cx = 230;
+  const cy = 230;
+  const r = 165;
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
 
@@ -218,7 +218,7 @@ const RadarChart = ({
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 select-none">
-      <svg width="500" height="500" className="overflow-visible">
+      <svg width="460" height="460" className="overflow-visible">
         {/* Grid outline lines */}
         {gridLevels.map((level, i) => (
           <polygon
@@ -776,14 +776,14 @@ export default function Home() {
         {/* Warm glow */}
         <div className="absolute top-1/3 left-[5%] w-[400px] h-[400px] bg-zinc-500/8 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row justify-between items-center gap-16 lg:gap-24 relative z-10">
+        <div className="max-w-[1380px] mx-auto px-6 md:px-16 py-16 flex flex-col md:flex-row justify-between items-center gap-16 lg:gap-24 relative z-10">
           {/* Left Panel: 3D Flip Card Container */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[42%] shrink-0"
+            className="w-full md:w-[38%] shrink-0"
           >
             <div style={{ perspective: "1000px" }} className="w-full relative h-[650px]">
               <div
@@ -987,7 +987,7 @@ export default function Home() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[48%] h-[65vh] md:h-[72vh] relative"
+            className="w-full md:w-[46%] h-[65vh] md:h-[72vh] relative"
           >
             <PaperBinSkillset 
               theme={resolvedTheme} 
