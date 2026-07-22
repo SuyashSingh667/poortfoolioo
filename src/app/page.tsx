@@ -682,12 +682,10 @@ export default function Home() {
         {/* Spotlight & Grid Background Overlay */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
           <div className="absolute inset-0 [background-size:40px_40px] [background-image:linear-gradient(to_right,rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.04)_1px,transparent_1px)] dark:[background-image:linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)]" />
-          <div className="absolute inset-0 scale-y-[-1]">
-            <Spotlight
-              className="-top-40 left-0 md:-top-20 md:left-20"
-              fill={resolvedTheme === "dark" ? "white" : "rgba(113, 113, 122, 0.25)"}
-            />
-          </div>
+          <Spotlight
+            className="-top-40 left-0 md:-top-20 md:left-0"
+            fill={resolvedTheme === "dark" ? "white" : "rgba(113, 113, 122, 0.25)"}
+          />
         </div>
         {/* Left Column: 3D Avatar Canvas */}
         <div className="w-full md:w-[48%] h-[60vh] md:h-[88vh] relative flex items-center justify-center pb-20 -translate-y-[10px]">
