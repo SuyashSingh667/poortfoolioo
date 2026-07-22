@@ -156,6 +156,7 @@
 }
 
 .animate-spotlight {
+  opacity: 0;
   animation: spotlight 2s ease .75s 1 forwards;
 }
 
