@@ -360,7 +360,7 @@ export default function Home() {
             return `+=${dist > 0 ? dist : 0}`;
           },
           pin: true,
-          scrub: 0.1,
+          scrub: 1.2,
           animation: anim,
           invalidateOnRefresh: true,
         });
