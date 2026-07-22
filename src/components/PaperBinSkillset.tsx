@@ -8,6 +8,7 @@ const SKILL_ITEMS = [
   "React", "Next.js", "TypeScript", "WebGL", "Three.js", "Tailwind",
   "GSAP", "Framer", "Node.js", "Figma", "UI/UX", "Shaders",
   "PostgreSQL", "GraphQL", "Docker", "Python", "Redis",
+  "Go", "AWS", "MongoDB",
 ];
 const M = Matter;
 const N = SKILL_ITEMS.length;

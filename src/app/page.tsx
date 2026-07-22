@@ -192,9 +192,10 @@ const RadarChart = ({
 
   const axes = [
     { key: "Creative/3D", label: "Creative/3D", value: 96, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -15 },
-    { key: "Frontend", label: "Frontend", value: 64, angle: 0, xAlign: "start", yAlign: "middle", dx: 18 },
-    { key: "Architecture", label: "Architecture", value: 48, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 18 },
-    { key: "Motion", label: "Motion", value: 88, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -18 },
+    { key: "Frontend", label: "Frontend", value: 88, angle: -Math.PI / 2 + (2 * Math.PI / 5), xAlign: "start", yAlign: "middle", dx: 18, dy: -6 },
+    { key: "Backend", label: "Backend", value: 82, angle: -Math.PI / 2 + (4 * Math.PI / 5), xAlign: "start", yAlign: "middle", dx: 18, dy: 6 },
+    { key: "Architecture", label: "Architecture", value: 70, angle: -Math.PI / 2 + (6 * Math.PI / 5), xAlign: "end", yAlign: "middle", dx: -18, dy: 6 },
+    { key: "Motion", label: "Motion", value: 80, angle: -Math.PI / 2 + (8 * Math.PI / 5), xAlign: "end", yAlign: "middle", dx: -18, dy: -6 },
   ];
 
   const cx = 250;
@@ -562,7 +563,8 @@ export default function Home() {
   const CATEGORIES: Record<string, string[]> = {
     "Creative/3D": ["WebGL", "Three.js", "Shaders"],
     "Frontend": ["React", "Next.js", "Tailwind", "Figma", "UI/UX"],
-    "Architecture": ["TypeScript", "Node.js", "PostgreSQL", "GraphQL", "Docker", "Python", "Redis"],
+    "Backend": ["PostgreSQL", "GraphQL", "Docker", "Python", "Redis", "Go", "AWS", "MongoDB"],
+    "Architecture": ["TypeScript", "Node.js"],
     "Motion": ["GSAP", "Framer"]
   };
   const highlightedSkills = hoveredCategory ? CATEGORIES[hoveredCategory] || [] : [];
