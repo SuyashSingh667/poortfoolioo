@@ -93,7 +93,7 @@ export default function InteractiveAvatar3D({
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(0, 0.5, 5.5);
+    camera.position.set(0, 0.0, 4.3);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
@@ -153,7 +153,7 @@ export default function InteractiveAvatar3D({
         modelWrap.scale.setScalar(scale);
 
         // Adjust Y position so the entire head and body fit comfortably within the camera frame
-        modelWrap.position.y = -0.45;
+        modelWrap.position.y = 0.0;
 
         avatarGroup.add(modelWrap);
 
