@@ -191,15 +191,15 @@ const RadarChart = ({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const axes = [
-    { key: "Creative/3D", label: "Creative/3D", value: 94, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -10 },
-    { key: "Frontend", label: "Frontend", value: 76, angle: 0, xAlign: "start", yAlign: "middle", dx: 10 },
-    { key: "Architecture", label: "Architecture", value: 58, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 12 },
-    { key: "Motion", label: "Motion", value: 85, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -10 },
+    { key: "Creative/3D", label: "Creative/3D", value: 94, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -12 },
+    { key: "Frontend", label: "Frontend", value: 76, angle: 0, xAlign: "start", yAlign: "middle", dx: 12 },
+    { key: "Architecture", label: "Architecture", value: 58, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 14 },
+    { key: "Motion", label: "Motion", value: 85, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -12 },
   ];
 
-  const cx = 140;
-  const cy = 140;
-  const r = 95;
+  const cx = 175;
+  const cy = 175;
+  const r = 125;
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
 
@@ -217,7 +217,7 @@ const RadarChart = ({
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 select-none">
-      <svg width="280" height="280" className="overflow-visible">
+      <svg width="350" height="350" className="overflow-visible">
         {/* Grid outline lines */}
         {gridLevels.map((level, i) => (
           <polygon
@@ -287,7 +287,7 @@ const RadarChart = ({
               <circle
                 cx={x}
                 cy={y}
-                r="5.5"
+                r="6"
                 className="fill-[#171717] dark:fill-white transition-all duration-300"
                 style={{
                   transform: isActive ? "scale(1.5)" : "scale(1)",
@@ -297,7 +297,7 @@ const RadarChart = ({
               <circle
                 cx={x}
                 cy={y}
-                r="14"
+                r="16"
                 fill="transparent"
               />
             </g>
@@ -306,7 +306,7 @@ const RadarChart = ({
 
         {/* Labels */}
         {axes.map((axis, i) => {
-          const labelR = r + 16;
+          const labelR = r + 18;
           const x = cx + labelR * Math.cos(axis.angle) + (axis.dx || 0);
           const y = cy + labelR * Math.sin(axis.angle) + (axis.dy || 0);
           const isActive = activeCategory === axis.key;
@@ -319,7 +319,7 @@ const RadarChart = ({
               dominantBaseline={axis.yAlign as any}
               onMouseEnter={() => handleHover(axis.key)}
               onMouseLeave={() => handleHover(null)}
-              className={`font-mono text-[9px] uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
+              className={`font-mono text-[10px] uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
                 isActive 
                   ? "text-[#171717] dark:text-white font-bold" 
                   : "text-zinc-400 dark:text-zinc-500"
@@ -783,7 +783,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-60px" }}
             className="w-full md:w-[36%] shrink-0"
           >
-            <div style={{ perspective: "1000px" }} className="w-full relative h-[480px]">
+            <div style={{ perspective: "1000px" }} className="w-full relative h-[540px]">
               <div
                 style={{
                   transformStyle: "preserve-3d",
