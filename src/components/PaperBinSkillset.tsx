@@ -9,6 +9,7 @@ const SKILL_ITEMS = [
   "GSAP", "Framer", "Node.js", "Figma", "UI/UX", "Shaders",
   "PostgreSQL", "GraphQL", "Docker", "Python", "Redis",
   "Go", "AWS", "MongoDB",
+  "Git", "Firebase", "WebSockets",
 ];
 const M = Matter;
 const N = SKILL_ITEMS.length;
