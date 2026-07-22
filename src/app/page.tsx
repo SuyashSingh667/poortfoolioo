@@ -10,6 +10,7 @@ import InfiniteMenu from "@/components/InfiniteMenu";
 import GlitterWrap from "@/components/GlitterWrap";
 import TextPressure from "@/components/TextPressure";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
+import { MusicToggleButton } from "@/components/MusicToggle";
 import PaperBinSkillset from "@/components/PaperBinSkillset";
 import MeshText from "@/components/MeshText";
 import InteractiveAvatar3D from "@/components/InteractiveAvatar3D";
@@ -411,9 +412,11 @@ export default function Home() {
               {label}
             </a>
           ))}
+          <MusicToggleButton />
           <ThemeToggleButton className="scale-90" />
         </nav>
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-3">
+          <MusicToggleButton />
           <ThemeToggleButton className="scale-90" />
         </div>
       </header>
