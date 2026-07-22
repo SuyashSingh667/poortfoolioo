@@ -191,15 +191,15 @@ const RadarChart = ({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const axes = [
-    { key: "Creative/3D", label: "Creative/3D", value: 96, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -14 },
-    { key: "Frontend", label: "Frontend", value: 64, angle: 0, xAlign: "start", yAlign: "middle", dx: 16 },
-    { key: "Architecture", label: "Architecture", value: 48, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 16 },
-    { key: "Motion", label: "Motion", value: 88, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -16 },
+    { key: "Creative/3D", label: "Creative/3D", value: 96, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -15 },
+    { key: "Frontend", label: "Frontend", value: 64, angle: 0, xAlign: "start", yAlign: "middle", dx: 18 },
+    { key: "Architecture", label: "Architecture", value: 48, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 18 },
+    { key: "Motion", label: "Motion", value: 88, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -18 },
   ];
 
-  const cx = 210;
-  const cy = 210;
-  const r = 150;
+  const cx = 250;
+  const cy = 250;
+  const r = 180;
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
 
@@ -217,7 +217,7 @@ const RadarChart = ({
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 select-none">
-      <svg width="420" height="420" className="overflow-visible">
+      <svg width="500" height="500" className="overflow-visible">
         {/* Grid outline lines */}
         {gridLevels.map((level, i) => (
           <polygon
@@ -306,7 +306,7 @@ const RadarChart = ({
 
         {/* Labels */}
         {axes.map((axis, i) => {
-          const labelR = r + 20;
+          const labelR = r + 22;
           const x = cx + labelR * Math.cos(axis.angle) + (axis.dx || 0);
           const y = cy + labelR * Math.sin(axis.angle) + (axis.dy || 0);
           const isActive = activeCategory === axis.key;
@@ -319,7 +319,7 @@ const RadarChart = ({
               dominantBaseline={axis.yAlign as any}
               onMouseEnter={() => handleHover(axis.key)}
               onMouseLeave={() => handleHover(null)}
-              className={`font-mono text-[11px] md:text-[12px] font-bold uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
+              className={`font-mono text-[12px] md:text-[13px] font-bold uppercase tracking-wider transition-colors duration-300 cursor-pointer ${
                 isActive 
                   ? "text-[#171717] dark:text-white" 
                   : "text-zinc-500 dark:text-zinc-400"
@@ -781,9 +781,9 @@ export default function Home() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[36%] shrink-0"
+            className="w-full md:w-[48%] shrink-0"
           >
-            <div style={{ perspective: "1000px" }} className="w-full relative h-[600px]">
+            <div style={{ perspective: "1000px" }} className="w-full relative h-[650px]">
               <div
                 style={{
                   transformStyle: "preserve-3d",
@@ -985,7 +985,7 @@ export default function Home() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true, margin: "-60px" }}
-            className="w-full md:w-[64%] h-[65vh] md:h-[72vh] relative"
+            className="w-full md:w-[52%] h-[65vh] md:h-[72vh] relative"
           >
             <PaperBinSkillset 
               theme={resolvedTheme} 
