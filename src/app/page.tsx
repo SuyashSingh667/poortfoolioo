@@ -191,15 +191,15 @@ const RadarChart = ({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const axes = [
-    { key: "Creative/3D", label: "Creative/3D", value: 90, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -8 },
-    { key: "Frontend", label: "Frontend", value: 95, angle: 0, xAlign: "start", yAlign: "middle", dx: 8 },
-    { key: "Architecture", label: "Architecture", value: 85, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 10 },
-    { key: "Motion", label: "Motion", value: 90, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -8 },
+    { key: "Creative/3D", label: "Creative/3D", value: 94, angle: -Math.PI / 2, xAlign: "middle", yAlign: "bottom", dy: -10 },
+    { key: "Frontend", label: "Frontend", value: 76, angle: 0, xAlign: "start", yAlign: "middle", dx: 10 },
+    { key: "Architecture", label: "Architecture", value: 58, angle: Math.PI / 2, xAlign: "middle", yAlign: "top", dy: 12 },
+    { key: "Motion", label: "Motion", value: 85, angle: Math.PI, xAlign: "end", yAlign: "middle", dx: -10 },
   ];
 
-  const cx = 110;
-  const cy = 110;
-  const r = 70;
+  const cx = 140;
+  const cy = 140;
+  const r = 95;
 
   const gridLevels = [0.25, 0.5, 0.75, 1];
 
@@ -217,7 +217,7 @@ const RadarChart = ({
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4 select-none">
-      <svg width="220" height="220" className="overflow-visible">
+      <svg width="280" height="280" className="overflow-visible">
         {/* Grid outline lines */}
         {gridLevels.map((level, i) => (
           <polygon
@@ -229,7 +229,7 @@ const RadarChart = ({
               return `${x},${y}`;
             }).join(" ")}
             fill="none"
-            className="stroke-black/[0.06] dark:stroke-white/[0.06]"
+            className="stroke-black/[0.05] dark:stroke-white/[0.05]"
             strokeWidth="1"
           />
         ))}
@@ -242,7 +242,7 @@ const RadarChart = ({
             cy={cy}
             r={r * level}
             fill="none"
-            className="stroke-black/[0.03] dark:stroke-white/[0.03] stroke-dasharray-[2_4]"
+            className="stroke-black/[0.02] dark:stroke-white/[0.02] stroke-dasharray-[2_4]"
             strokeWidth="1"
           />
         ))}
@@ -255,7 +255,7 @@ const RadarChart = ({
             y1={cy}
             x2={cx + r * Math.cos(axis.angle)}
             y2={cy + r * Math.sin(axis.angle)}
-            className="stroke-black/10 dark:stroke-white/10"
+            className="stroke-black/[0.08] dark:stroke-white/[0.08]"
             strokeWidth="1.2"
           />
         ))}
@@ -267,7 +267,7 @@ const RadarChart = ({
           className="stroke-[#171717] dark:stroke-white transition-all duration-300"
           strokeWidth="2.2"
           style={{
-            filter: activeCategory ? "drop-shadow(0 0 8px rgba(113, 113, 122, 0.3))" : "none"
+            filter: activeCategory ? "drop-shadow(0 0 10px rgba(113, 113, 122, 0.35))" : "none"
           }}
         />
 
@@ -287,7 +287,7 @@ const RadarChart = ({
               <circle
                 cx={x}
                 cy={y}
-                r="5"
+                r="5.5"
                 className="fill-[#171717] dark:fill-white transition-all duration-300"
                 style={{
                   transform: isActive ? "scale(1.5)" : "scale(1)",
@@ -297,7 +297,7 @@ const RadarChart = ({
               <circle
                 cx={x}
                 cy={y}
-                r="12"
+                r="14"
                 fill="transparent"
               />
             </g>
@@ -306,7 +306,7 @@ const RadarChart = ({
 
         {/* Labels */}
         {axes.map((axis, i) => {
-          const labelR = r + 15;
+          const labelR = r + 16;
           const x = cx + labelR * Math.cos(axis.angle) + (axis.dx || 0);
           const y = cy + labelR * Math.sin(axis.angle) + (axis.dy || 0);
           const isActive = activeCategory === axis.key;
@@ -783,7 +783,7 @@ export default function Home() {
             viewport={{ once: true, margin: "-60px" }}
             className="w-full md:w-[36%] shrink-0"
           >
-            <div style={{ perspective: "1000px" }} className="w-full relative h-[440px]">
+            <div style={{ perspective: "1000px" }} className="w-full relative h-[480px]">
               <div
                 style={{
                   transformStyle: "preserve-3d",
@@ -797,7 +797,7 @@ export default function Home() {
                   style={{
                     backfaceVisibility: "hidden",
                   }}
-                  className="absolute inset-0 w-full h-full bg-black/[0.015] dark:bg-white/[0.015] border border-black/5 dark:border-white/5 rounded-2xl p-6 flex flex-col justify-between"
+                  className="absolute inset-0 w-full h-full p-2 flex flex-col justify-between bg-transparent border-none"
                 >
                   <div className="flex justify-between items-start w-full relative">
                     <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400 font-bold">
