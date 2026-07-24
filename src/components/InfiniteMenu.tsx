@@ -712,6 +712,7 @@ class InfiniteGridMenu {
   scaleFactor = 1.0;
   movementActive = false;
   onProjectSelect?: (index: number) => void;
+  isZoomed = false;
 
   constructor(canvas: HTMLCanvasElement, items: any[], onActiveItemChange: (index: number) => void, onMovementChange: (isMoving: boolean) => void, onInit: ((sk: InfiniteGridMenu) => void) | null = null, scale = 1.0) {
     this.canvas = canvas;
@@ -766,7 +767,7 @@ class InfiniteGridMenu {
       }
     }
 
-    if (nearestIndex !== -1 && minNDCDist < 0.28) {
+    if (nearestIndex !== -1) {
       const itemIndex = nearestIndex % Math.max(1, this.items.length);
       this.onActiveItemChange(itemIndex);
       
@@ -1021,11 +1022,11 @@ class InfiniteGridMenu {
   #updateProjectionMatrix(gl: WebGL2RenderingContext) {
     this.camera.aspect = this.canvas.clientWidth / this.canvas.clientHeight;
     const height = this.SPHERE_RADIUS * 0.35;
-    const distance = this.camera.position[2];
+    const referenceDistance = 2.8 * this.scaleFactor;
     if (this.camera.aspect > 1) {
-      this.camera.fov = 2 * Math.atan(height / distance);
+      this.camera.fov = 2 * Math.atan(height / referenceDistance);
     } else {
-      this.camera.fov = 2 * Math.atan(height / this.camera.aspect / distance);
+      this.camera.fov = 2 * Math.atan(height / this.camera.aspect / referenceDistance);
     }
     mat4.perspective(
       this.camera.matrices.projection,
@@ -1040,7 +1041,8 @@ class InfiniteGridMenu {
   #onControlUpdate(deltaTime: number) {
     const timeScale = deltaTime / this.TARGET_FRAME_DURATION + 0.0001;
     let damping = 5 / timeScale;
-    let cameraTargetZ = 3 * this.scaleFactor;
+    let baseZ = (this.isZoomed ? 1.75 : 3.1) * this.scaleFactor;
+    let cameraTargetZ = baseZ;
 
     const isMoving = this.control.isPointerDown || Math.abs(this.smoothRotationVelocity) > 0.01;
 
@@ -1056,7 +1058,7 @@ class InfiniteGridMenu {
       const snapDirection = vec3.normalize(vec3.create(), this.#getVertexWorldPosition(nearestVertexIndex));
       this.control.snapTargetDirection = snapDirection;
     } else {
-      cameraTargetZ += this.control.rotationVelocity * 80 + 2.5;
+      cameraTargetZ += this.control.rotationVelocity * 80 + (this.isZoomed ? 0.3 : 1.5);
       damping = 7 / timeScale;
     }
 
@@ -1114,6 +1116,7 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
   const [isMoving, setIsMoving] = useState(false);
   const [hasClickedProject, setHasClickedProject] = useState(false);
   const isIntersectingRef = useRef(false);
+  const sketchRef = useRef<InfiniteGridMenu | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -1124,6 +1127,12 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
     observer.observe(canvas);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (sketchRef.current) {
+      sketchRef.current.isZoomed = hasClickedProject;
+    }
+  }, [hasClickedProject]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -1167,6 +1176,8 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
         scale
       );
       sketch.isIntersectingRef = isIntersectingRef;
+      sketch.isZoomed = hasClickedProject;
+      sketchRef.current = sketch;
       sketch.onProjectSelect = (index: number) => {
         setHasClickedProject(true);
       };
@@ -1190,6 +1201,7 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
         canvas.removeEventListener('pointerdown', onPointerDown);
         canvas.removeEventListener('pointerup', onPointerUp);
       }
+      sketchRef.current = null;
     };
   }, [items, scale]);
 
