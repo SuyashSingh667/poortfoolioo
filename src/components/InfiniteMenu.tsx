@@ -970,6 +970,11 @@ class InfiniteGridMenu {
   #render() {
     const gl = this.gl;
     if (!this.discProgram) return;
+
+    if (this.canvas.clientWidth !== this.viewportSize[0] || this.canvas.clientHeight !== this.viewportSize[1]) {
+      this.resize();
+    }
+
     gl.useProgram(this.discProgram);
 
     gl.enable(gl.CULL_FACE);
