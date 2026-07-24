@@ -747,8 +747,8 @@ class InfiniteGridMenu {
     let minNDCDist = Infinity;
 
     for (let i = 0; i < this.DISC_INSTANCE_COUNT; i++) {
-      const p = vec3.transformQuat(vec3.create(), this.instancePositions[i], this.control.orientation);
-      const worldPos = vec3.negate(vec3.create(), p);
+      const matrix = this.discInstances.matrices[i];
+      const worldPos = [matrix[12], matrix[13], matrix[14]];
       
       const clip = [worldPos[0], worldPos[1], worldPos[2], 1.0];
       
