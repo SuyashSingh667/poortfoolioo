@@ -750,6 +750,9 @@ class InfiniteGridMenu {
       const matrix = this.discInstances.matrices[i];
       const worldPos = [matrix[12], matrix[13], matrix[14]];
       
+      // Depth check: skip discs on the back half of the sphere
+      if (worldPos[2] < 0.0) continue;
+      
       const clip = [worldPos[0], worldPos[1], worldPos[2], 1.0];
       
       const x_clip = viewProj[0]*clip[0] + viewProj[4]*clip[1] + viewProj[8]*clip[2] + viewProj[12]*clip[3];
