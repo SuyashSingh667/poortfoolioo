@@ -711,6 +711,7 @@ class InfiniteGridMenu {
   smoothRotationVelocity = 0;
   scaleFactor = 1.0;
   movementActive = false;
+  onProjectSelect?: (index: number) => void;
 
   constructor(canvas: HTMLCanvasElement, items: any[], onActiveItemChange: (index: number) => void, onMovementChange: (isMoving: boolean) => void, onInit: ((sk: InfiniteGridMenu) => void) | null = null, scale = 1.0) {
     this.canvas = canvas;
@@ -732,6 +733,52 @@ class InfiniteGridMenu {
     }
 
     this.#updateProjectionMatrix(gl);
+  }
+
+  handleCanvasClick(clientX: number, clientY: number) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -(((clientY - rect.top) / rect.height) * 2 - 1);
+
+    const viewProj = mat4.multiply(mat4.create(), this.camera.matrices.projection, this.camera.matrices.view);
+
+    let nearestIndex = -1;
+    let minNDCDist = Infinity;
+
+    for (let i = 0; i < this.DISC_INSTANCE_COUNT; i++) {
+      const p = vec3.transformQuat(vec3.create(), this.instancePositions[i], this.control.orientation);
+      const worldPos = vec3.negate(vec3.create(), p);
+      
+      const clip = [worldPos[0], worldPos[1], worldPos[2], 1.0];
+      
+      const x_clip = viewProj[0]*clip[0] + viewProj[4]*clip[1] + viewProj[8]*clip[2] + viewProj[12]*clip[3];
+      const y_clip = viewProj[1]*clip[0] + viewProj[5]*clip[1] + viewProj[9]*clip[2] + viewProj[13]*clip[3];
+      const w_clip = viewProj[3]*clip[0] + viewProj[7]*clip[1] + viewProj[11]*clip[2] + viewProj[15]*clip[3];
+
+      if (w_clip === 0) continue;
+      const ndcX = x_clip / w_clip;
+      const ndcY = y_clip / w_clip;
+
+      const dist = Math.sqrt((ndcX - x) * (ndcX - x) + (ndcY - y) * (ndcY - y));
+      if (dist < minNDCDist) {
+        minNDCDist = dist;
+        nearestIndex = i;
+      }
+    }
+
+    if (nearestIndex !== -1 && minNDCDist < 0.28) {
+      const itemIndex = nearestIndex % Math.max(1, this.items.length);
+      this.onActiveItemChange(itemIndex);
+      
+      const nearestVertexPos = this.instancePositions[nearestIndex];
+      const vertexWorldPos = vec3.transformQuat(vec3.create(), nearestVertexPos, this.control.orientation);
+      const snapDirection = vec3.normalize(vec3.create(), vertexWorldPos);
+      this.control.snapTargetDirection = snapDirection;
+
+      if (this.onProjectSelect) {
+        this.onProjectSelect(itemIndex);
+      }
+    }
   }
 
   isIntersectingRef?: React.RefObject<boolean>;
@@ -1065,6 +1112,7 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeItem, setActiveItem] = useState<InfiniteMenuItem | null>(null);
   const [isMoving, setIsMoving] = useState(false);
+  const [hasClickedProject, setHasClickedProject] = useState(false);
   const isIntersectingRef = useRef(false);
 
   useEffect(() => {
@@ -1087,6 +1135,28 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
       setActiveItem(list[itemIndex] as InfiniteMenuItem);
     };
 
+    let startX = 0;
+    let startY = 0;
+    let startTime = 0;
+
+    const onPointerDown = (e: PointerEvent) => {
+      startX = e.clientX;
+      startY = e.clientY;
+      startTime = Date.now();
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      const diffX = e.clientX - startX;
+      const diffY = e.clientY - startY;
+      const elapsed = Date.now() - startTime;
+
+      if (Math.sqrt(diffX * diffX + diffY * diffY) < 8 && elapsed < 350) {
+        if (sketch) {
+          sketch.handleCanvasClick(e.clientX, e.clientY);
+        }
+      }
+    };
+
     if (canvas) {
       sketch = new InfiniteGridMenu(
         canvas,
@@ -1097,6 +1167,12 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
         scale
       );
       sketch.isIntersectingRef = isIntersectingRef;
+      sketch.onProjectSelect = (index: number) => {
+        setHasClickedProject(true);
+      };
+
+      canvas.addEventListener('pointerdown', onPointerDown);
+      canvas.addEventListener('pointerup', onPointerUp);
     }
 
     const handleResize = () => {
@@ -1110,6 +1186,10 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (canvas) {
+        canvas.removeEventListener('pointerdown', onPointerDown);
+        canvas.removeEventListener('pointerup', onPointerUp);
+      }
     };
   }, [items, scale]);
 
@@ -1126,7 +1206,23 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <canvas id="infinite-grid-menu-canvas" ref={canvasRef} />
 
-      {activeItem && (
+      {!hasClickedProject && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 animate-fade-in select-none">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-black/10 dark:border-white/12 bg-white/80 dark:bg-black/80 backdrop-blur-xl shadow-lg animate-pulse">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-zinc-650 dark:bg-zinc-250"></span>
+              </span>
+              <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.25em] font-semibold text-zinc-700 dark:text-zinc-200">
+                Click a project to explore
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeItem && hasClickedProject && (
         <>
           <div className={`face-title ${isMoving ? 'inactive' : 'active'}`}>
             <FlickerText
