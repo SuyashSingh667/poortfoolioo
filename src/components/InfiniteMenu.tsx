@@ -1113,13 +1113,29 @@ export interface InfiniteMenuItem {
 export interface InfiniteMenuProps {
   items?: InfiniteMenuItem[];
   scale?: number;
+  hasClickedProject?: boolean;
+  onProjectSelect?: (index: number) => void;
 }
 
-export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuProps) {
+export default function InfiniteMenu({ 
+  items = [], 
+  scale = 1.0,
+  hasClickedProject: propsHasClickedProject,
+  onProjectSelect: propsOnProjectSelect
+}: InfiniteMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeItem, setActiveItem] = useState<InfiniteMenuItem | null>(null);
   const [isMoving, setIsMoving] = useState(false);
-  const [hasClickedProject, setHasClickedProject] = useState(false);
+  const [localHasClickedProject, setLocalHasClickedProject] = useState(false);
+  const hasClickedProject = propsHasClickedProject !== undefined ? propsHasClickedProject : localHasClickedProject;
+  const setHasClickedProject = () => {
+    if (propsOnProjectSelect) {
+      propsOnProjectSelect(0);
+    } else {
+      setLocalHasClickedProject(true);
+    }
+  };
+
   const isIntersectingRef = useRef(false);
   const sketchRef = useRef<InfiniteGridMenu | null>(null);
 
@@ -1184,7 +1200,7 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
       sketch.isZoomed = hasClickedProject;
       sketchRef.current = sketch;
       sketch.onProjectSelect = (index: number) => {
-        setHasClickedProject(true);
+        setHasClickedProject();
       };
 
       canvas.addEventListener('pointerdown', onPointerDown);
@@ -1222,20 +1238,6 @@ export default function InfiniteMenu({ items = [], scale = 1.0 }: InfiniteMenuPr
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <canvas id="infinite-grid-menu-canvas" ref={canvasRef} />
-
-      {!hasClickedProject && (
-        <div className="absolute top-8 left-0 right-0 flex justify-center pointer-events-none z-10 animate-fade-in select-none">
-          <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-black/10 dark:border-white/12 bg-white/80 dark:bg-black/80 backdrop-blur-xl shadow-lg animate-pulse">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-zinc-650 dark:bg-zinc-250"></span>
-            </span>
-            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.25em] font-semibold text-zinc-700 dark:text-zinc-200">
-              Click a project to explore
-            </span>
-          </div>
-        </div>
-      )}
 
       {activeItem && hasClickedProject && (
         <>

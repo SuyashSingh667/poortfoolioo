@@ -143,7 +143,7 @@ function SkillsMarquee() {
 }
 
 // ─── Bold editorial section header ────────────────────────────────────────────
-function Chapter({ num, eyebrow, title }: { num: string; eyebrow: string; title: string }) {
+function Chapter({ num, eyebrow, title, children }: { num: string; eyebrow: string; title: string; children?: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
   const textColor = resolvedTheme === "dark" ? "#ffffff" : "#171717";
 
@@ -178,6 +178,7 @@ function Chapter({ num, eyebrow, title }: { num: string; eyebrow: string; title:
             }}
           />
         </div>
+        {children}
       </Reveal>
     </div>
   );
@@ -359,6 +360,7 @@ export default function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
+  const [hasClickedProject, setHasClickedProject] = useState(false);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -687,11 +689,28 @@ export default function Home() {
       {/* ════════════════════════════════════════════════════════════════════════
           01 — WORK
       ════════════════════════════════════════════════════════════════════════ */}
-      <Chapter num="01" eyebrow="Selected Work" title="Projects." />
+      <Chapter num="01" eyebrow="Selected Work" title="Projects.">
+        {!hasClickedProject && (
+          <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-black/10 dark:border-white/12 bg-white/80 dark:bg-black/80 backdrop-blur-xl shadow-lg animate-pulse w-fit mt-4">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-zinc-650 dark:bg-zinc-250"></span>
+            </span>
+            <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.25em] font-semibold text-zinc-700 dark:text-zinc-200">
+              Click a project to explore
+            </span>
+          </div>
+        )}
+      </Chapter>
 
       <section id="work" className="relative h-screen w-full overflow-hidden bg-white dark:bg-[#0c0c0c] border-b border-black/5 dark:border-white/5 transition-colors duration-500 p-4 md:p-8">
         <div className="h-full w-full rounded-[24px] md:rounded-[40px] overflow-hidden border border-black/5 dark:border-white/5 relative">
-          <InfiniteMenu items={menuItems} scale={1.0} />
+          <InfiniteMenu 
+            items={menuItems} 
+            scale={1.0} 
+            hasClickedProject={hasClickedProject}
+            onProjectSelect={() => setHasClickedProject(true)}
+          />
         </div>
       </section>
 
