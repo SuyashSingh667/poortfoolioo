@@ -720,7 +720,7 @@ class InfiniteGridMenu {
     this.onActiveItemChange = onActiveItemChange || (() => {});
     this.onMovementChange = onMovementChange || (() => {});
     this.scaleFactor = scale;
-    this.camera.position[2] = 3 * scale;
+    this.camera.position[2] = 4.5 * scale;
     this.#init(onInit);
   }
 
@@ -1046,7 +1046,7 @@ class InfiniteGridMenu {
   #onControlUpdate(deltaTime: number) {
     const timeScale = deltaTime / this.TARGET_FRAME_DURATION + 0.0001;
     let damping = 5 / timeScale;
-    let baseZ = (this.isZoomed ? 1.75 : 3.1) * this.scaleFactor;
+    let baseZ = (this.isZoomed ? 3.1 : 4.5) * this.scaleFactor;
     let cameraTargetZ = baseZ;
 
     const isMoving = this.control.isPointerDown || Math.abs(this.smoothRotationVelocity) > 0.01;
@@ -1063,7 +1063,7 @@ class InfiniteGridMenu {
       const snapDirection = vec3.normalize(vec3.create(), this.#getVertexWorldPosition(nearestVertexIndex));
       this.control.snapTargetDirection = snapDirection;
     } else {
-      cameraTargetZ += this.control.rotationVelocity * 80 + (this.isZoomed ? 0.3 : 1.5);
+      cameraTargetZ += this.control.rotationVelocity * 80 + (this.isZoomed ? 1.4 : 0.2) * this.scaleFactor;
       damping = 7 / timeScale;
     }
 
